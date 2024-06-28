@@ -1,0 +1,49 @@
+﻿@using Microsoft.AspNetCore.Localization;
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var returnUrl = string.IsNullOrEmpty(Context.Request.Path) ? "~/" : $"~{Context.Request.Path.Value}";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - TeslaMed</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/TeslaMed.styles.css" asp-append-version="true" />
+    <link rel="icon" type="image/png" href="~/images/icon.png">
+</head>
+<body style="background-color:#0161AB;">
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light mb-3">
+            <div class="container-fluid justify-content-end mt-1 me-1">
+                @if (requestCulture.RequestCulture.UICulture.Name == "ru")
+                {
+                    <a class="navbar-brand d-flex pt-0" asp-area="" asp-action="SetLanguage" asp-controller="Account" asp-route-culture="ky" asp-route-returnUrl="@returnUrl">
+                        <img src="~/images/flagRU.svg" alt="flagRU" style="max-width: 50px;" /><p class="mb-0 fw-bold fs-5 ps-1 text-light">RU</p>
+                    </a>
+                }
+                @if (requestCulture.RequestCulture.UICulture.Name == "ky")
+                {
+                    <a class="navbar-brand d-flex pt-0" asp-area="" asp-action="SetLanguage" asp-controller="Account" asp-route-culture="ru" asp-route-returnUrl="@returnUrl">
+                        <img src="~/images/flagKG.svg" alt="flagKG" style="max-width: 50px;" /><p class="mb-0 fw-bold fs-5 ps-1 text-light">KG</p>
+                    </a>
+                }
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

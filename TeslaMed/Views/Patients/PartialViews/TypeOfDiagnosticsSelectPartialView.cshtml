@@ -1,0 +1,52 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@model TeslaMed.ViewModels.DiagnosticsCreateViewModel;
+
+@if (Model.TypesOfDiagnostics.Count == 0)
+{
+    <option value="" hidden>@Localizer["NullListTypeOfDiagnostics"]</option>
+}
+else
+{
+    <option value="" hidden>@Localizer["ChooseTypeOfDiagnostics"]</option>
+    @foreach (var item in Model.TypesOfDiagnostics)
+    {
+        <option value="@item.Id">@item.ResearchMethod.Name @item.Name - @Localizer["Price"] @item.Price</option>
+    }
+}
+
+<script>
+    function newDiagnostics() {
+            let container = document.getElementById("diagnostics");
+            let selectCount = container.getElementsByTagName("select").length;
+            let nextSelectId = selectCount + 1;
+            let arrOptionsId = [];
+            let arrOptionsName = [];
+            let arrOptionsPrice = [];
+            let arrOptionsType = [];
+    @foreach (var item in Model.TypesOfDiagnostics)
+    {
+        @:arrOptionsId.push("@item.Id");
+        @:arrOptionsName.push("@item.Name");
+        @:arrOptionsPrice.push("@item.Price");
+        @:arrOptionsType.push("@item.ResearchMethod.Name");
+    }
+            let html = '<label asp-for="TypesOfDiagnosticsId" class="control-label mt-3">@Localizer["TypeOfDiagnostics"]</label>';
+            html += '<select asp-for="TypesOfDiagnosticsId[' + nextSelectId + ']" class="form-select" name="TypesOfDiagnosticsId[' + nextSelectId + ']" onchange="getTotalSum()" data-val="true" id="TypesOfDiagnosticsId_' + nextSelectId + '_" required title="@Localizer["ChooseTypeOfDiagnostics"]" >';
+            if ('@Model.TypesOfDiagnostics.Count' === '0')
+                html += '<option value="" hidden>@Localizer["NullListTypeOfDiagnostics"]</option>';
+            html += '<option value="" hidden>@Localizer["ChooseTypeOfDiagnostics"]</option>';
+            for (let i = 0; i < arrOptionsId.length; i++){
+                html += '<option value="' + arrOptionsId[i] + '" >' + arrOptionsType[i] + ' ' + arrOptionsName[i] + ' - @Localizer["Price"] ' + arrOptionsPrice[i] + '</option>';
+            }
+            html += '</select>';
+            html += '<span class="text-danger field-validation-valid" data-valmsg-for="TypesOfDiagnosticsId[' + nextSelectId + ']" data-valmsg-replace="true"></span>'
+            let div = document.createElement("div");
+            div.setAttribute("id", "diagnostics_" + nextSelectId);
+            document.getElementById("diagnostics").appendChild(div);
+            document.getElementById("diagnostics_" + nextSelectId).innerHTML = html;
+            if (nextSelectId > 0) {
+                $('#deleteBtn').css('display', 'block');
+            }
+        }
+</script>

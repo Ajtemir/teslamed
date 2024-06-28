@@ -1,0 +1,129 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+@model List<Diagnostics>
+
+@{
+    ViewData["Title"] = Localizer["Title"];
+    int colCount = 0;
+    int typesTotalCount = 0;
+    int typesTotalCost = 0;
+}
+
+<a asp-action="ShowReportMainPage" class="btn btn-primary">@Localizer["BackToMainPage"]</a>
+<div class="mt-3 mb-3">
+    <form method="get" asp-action="@ViewContext.RouteData.Values["Action"]">
+        <div class="row justify-content-lg-center ms-md-5 me-0">
+             <div class="col-lg-3">
+                <select name="department" class="form-control">
+                    <option value="">@Localizer["AllDepartments"]</option>
+                    @foreach (var place in ViewBag.Departments)
+                    {
+                        <option value="@place.Id">@place.Name</option>
+                    }
+                </select>
+            </div>   
+            <div class="col-lg-3 d-flex">
+                <label class="mt-1 me-1" for="firstDate">@Localizer["From"]:</label>
+                <input type="date" name="firstDate" class="form-control" />
+            </div>
+            <div class="col-lg-3 d-flex">
+                <label class="mt-1 me-1" for="secondDate">@Localizer["To"]:</label>
+                <input type="date" name="secondDate" class="form-control" />
+            </div>           
+            <div class="col-lg-1 d-flex justify-content-lg-start justify-content-center" >
+                <button type="submit" class="p-0 border-0 bg-transparent" style="max-width: 38px" title="@Localizer["FilteringApplyReset"]">
+                    <img style="max-height: 38px" src="~/images/icons8-search.svg"/>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div>
+    <h4 class="text-center">@Localizer["Title"]:</h4>
+    @if (Model.Count == 0)
+    {
+        <p class="text-center">@Localizer["EmptyDiagnosticsList"]</p>
+    }
+    else
+    {
+        <table class="table table-bordered border-dark">
+            <thead>
+                <tr>
+                    <th>№</th>
+                    <th>@Localizer["TypesOfDiagnostics"]</th>
+                    @foreach (var doctor in Model.Select(d => d.Doctor).Distinct())
+                    {
+                        int currentColNumber = ViewBag.DepartmentFilter != null ? 1 : doctor.Departments.Count;
+                        <th colspan="@currentColNumber">
+                            <span>@doctor.Post.Title</span><br>
+                            <span>@doctor.Surname @doctor.Name @doctor.Patronymic</span>
+                        </th>
+                        colCount += currentColNumber;
+                    }
+                    <th colspan="2">@Localizer["Total"]:</th>
+                </tr>
+                <tr>
+                    <th colspan="2"></th>
+                    @foreach (var doctor in Model.Select(d => d.Doctor).Distinct())
+                    {
+                        foreach (var department in doctor.Departments)
+                        {
+                            <th>@(ViewBag.DepartmentFilter != null ? Model.FirstOrDefault().Department.Name : department.Name)</th>
+                            if (ViewBag.DepartmentFilter != null)
+                            {
+                                break;
+                            }
+                        }
+                    }
+                    <th>@Localizer["TypesCount"]</th>
+                    <th>@Localizer["TypesTotalCost"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < ViewBag.TypesOfDiagnostic.Count; i++)
+                {
+                    int typesCount = 0;
+                    int typesCost = 0;
+                    <tr>
+                        <th>@(i + 1)</th>
+                        <th>@ViewBag.TypesOfDiagnostic[i].ResearchMethod.Name @ViewBag.TypesOfDiagnostic[i].Name</th>
+                        @foreach (var doctor in Model.Select(d => d.Doctor).Distinct())
+                        {
+                            foreach (var department in doctor.Departments)
+                            {
+                                var diagnosticsList = Model.Where(d => d.Doctor == doctor && d.DepartmentId == (ViewBag.DepartmentFilter ?? department.Id)).Where(d => d.TypesOfDiagnostics.Contains(ViewBag.TypesOfDiagnostic[i])).ToList();
+                                <th>@DiagnosticCountAndPrice(ref typesCount, ref typesCost, diagnosticsList, ViewBag.TypesOfDiagnostic[i])</th>
+                                if (ViewBag.DepartmentFilter != null)
+                                {
+                                    break;
+                                }
+                            }
+                        }
+                        <th>@typesCount</th>
+                        <th>@typesCost</th>
+                    </tr>
+                    typesTotalCount += typesCount;
+                    typesTotalCost += typesCost;
+                }
+                <tr>
+                    <th colspan="@(colCount + 1)"></th>
+                    <th>@Localizer["TypesTotalResult"]:</th>
+                    <th>@typesTotalCount</th>
+                    <th>@typesTotalCost</th>
+                </tr>
+            </tbody>
+        </table>
+    }
+</div>
+
+@functions {
+    private int DiagnosticCountAndPrice(ref int typesCount, ref int typesCost,List<Diagnostics> list, TypeOfDiagnostics type)
+    {
+        typesCount += list.Count;
+        foreach (var diag in list)
+            typesCost += (int)((100 - (diag.Discount != null ? diag.Discount.Percent : 0)) * type.Price * 0.01);
+        return list.Count;
+    }
+}

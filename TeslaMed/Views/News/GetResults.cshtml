@@ -1,0 +1,94 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization;
+@inject IViewLocalizer Localizer
+@model Diagnostics;
+
+@{
+    Layout = "_LayoutResults";
+    ViewData["Title"] = Localizer["Title"];
+} 
+<div class="container">
+    <div class="mt-3 mb-3">
+        <form method="post" asp-action="GetResults" asp-controller="News">
+            <div class="row">
+                <div class="col-md-3 d-flex flex-column">
+                    <label for="resultsCode">@Localizer["ResultsCode"]:</label>
+                    <input type="number" id="resultsCode" name="resultsCode" class="form-control mt-auto align-self-end" />
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div>
+                    <button type="submit" class="btn btn-primary">@Localizer["Apply"]</button>
+                </div>                
+            </div>
+        </form>
+        <div class="mt-2">
+            @if(Model != null && Model.Id != -1)
+            {
+                <a asp-action="DownloadConclusion" asp-controller="Pdf" class="btn btn-success" asp-route-id="@Model.DicomPathAndImagesPaths[0].Id" asp-route-patientId="@Model.PatientId" asp-route-diagnosticsId="@Model.Id">@Localizer["PdfDownload"]</a>
+                foreach (TypeOfDiagnostics typeOfDiagnostics in Model.TypesOfDiagnostics)
+                {
+                    @if (Model.DicomPathAndImagesPaths.Count != 0)
+                    {
+                        @if (Model.DicomPathAndImagesPaths.FirstOrDefault(d => d.TypeOfDiagnosticsId == typeOfDiagnostics.Id) != null)
+                        {
+                            @if (Model.DicomPathAndImagesPaths.FirstOrDefault(d => d.TypeOfDiagnosticsId == typeOfDiagnostics.Id).IsDicomDownload == true)
+                            {
+                                //<a class="btn btn-primary ms-3" asp-action="ShowDicomImages" asp-controller="Patients" asp-route-diagnosticsId="@Model.Id" asp-route-typeOfDiagnosticsId="@typeOfDiagnostics.Id">@Localizer["View"]</a>
+                                <a class="btn btn-success ms-3" asp-action="DicomFileDownload" asp-controller="Patients" asp-route-id="@Model.DicomPathAndImagesPaths.FirstOrDefault(d => d.TypeOfDiagnosticsId == typeOfDiagnostics.Id).Id">@Localizer["DicomDowload"]</a>
+                            }
+                        }
+                    }
+                }
+            }
+        </div>
+    </div>
+    @if (Model != null && Model.Id != -1) {
+        <div>
+            <div class="pb-2">
+                <span class="fw-bold">@Localizer["FullName"]:</span>
+                <span>@Model.Patient.Surname @Model.Patient.Name @(Model.Patient.Patronymic != null ? Model.Patient.Patronymic : "")</span>
+            </div>
+            <div class="pb-2">
+                <span class="fw-bold">@Localizer["DateOfBirth"]:</span>
+                <span>@Model.Patient.BirthDate.ToString("dd/MM/yyyy")</span>
+            </div>
+            <div class="pb-2">
+                <span class="fw-bold">@Localizer["Gender"]:</span>
+                <span>@Localizer[GenderLocalizer(Model.Patient.Gender)]</span>
+            </div>
+            <div class="pb-2">
+                <span class="fw-bold">@Localizer["PatientCode"]:</span>
+                <span>@Model.Patient.Code</span>
+            </div>
+            <div class="pb-2">
+                <span class="fw-bold">@Localizer["DateOfVisit"]:</span> 
+                <span>@Model.TimeArrival.ToString("dd/MM/yyyy")</span>
+            </div>
+            @foreach(var dicom in Model.DicomPathAndImagesPaths)
+            {
+               <p>@dicom.Conclusion</p>
+            }
+        </div>
+    }
+    else if (Model?.Id == -1)
+    {
+        <span></span>
+    }
+    else
+    {
+        <div>
+            <p>@Localizer["NullModel"]</p>
+        </div>
+    }
+</div>
+
+@functions
+{
+    private string GenderLocalizer (string gender)
+    {
+        if (gender == "М")
+            return "MaleGender";
+        else
+            return "FemaleGender";
+    }
+}

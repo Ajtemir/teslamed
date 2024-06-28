@@ -1,0 +1,40 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@using TeslaMed.Models;
+
+@inject IViewLocalizer Localizer
+@model List<Doctor>
+@if (Model.Count == 0)
+{
+    <p class="text-center">@Localizer["NullList"]</p>
+}
+else
+{
+    <h3 class="text-center">@Localizer["Header"]</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>@Localizer["Surname"]</th>
+                <th>@Localizer["Name"]</th>
+                <th>@Localizer["Patronymic"]</th>
+                <th>@Localizer["Specialization"]</th>
+                <th>@Localizer["PlaceOfWork"]</th>
+                <th>@Localizer["Address"]</th>
+                <th>@Localizer["PhoneNumber"]</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var d in Model)
+            {
+                <tr>
+                    <td>@d.Surname</td>
+                    <td>@d.Name</td>
+                    <td>@d.Patronymic</td>
+                    <td>@d.Post</td>
+                    <td>@(d.PlaceOfWork != null ? d.PlaceOfWork.Name : "-")</td>
+                    <td>@d.Address</td>
+                    <td>@d.PhoneNumber</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

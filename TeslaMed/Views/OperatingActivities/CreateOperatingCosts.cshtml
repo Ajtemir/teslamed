@@ -1,0 +1,178 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+
+@inject IViewLocalizer Localizer
+@model TeslaMed.Models.OperatingCost
+
+@{
+    ViewData["Title"] = @Localizer["Header"];
+}
+
+<a class="btn btn-primary" asp-action="IndexOperatingCosts">@Localizer["ButtonBack"]</a>
+
+<div class="row justify-content-around ms-0 me-0">
+    <div class="col col-sm-8 col-md-6 col-lg-5 col-xl-4 col-xxl-4">
+        <form asp-action="CreateOperatingCosts" method="post" id="form">
+            <h4 class="mb-3 text-center">@Localizer["Header"]</h4>
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group mb-3">
+                <label asp-for="OperatingCostNameId" class="control-label"></label>
+                <input type="text" list="names" class="form-control" id="nameInput" placeholder="@Localizer["NameInputPlaceholder"]" />
+                <datalist id="names">
+                    @{
+                        int counter = 0;
+                        foreach (var item in ViewBag.OperatingCostNames)
+                        {
+                            <option value="@item.Name, @item.Unit" id="optionValue_@counter"></option>
+                            <input type="hidden" value="@item.Id" asp-for="OperatingCostNameId" id="nameIdInput_@counter" />
+                            counter++;
+                        }
+                    }
+                </datalist>
+                <span asp-validation-for="OperatingCostNameId" class="text-danger" id="nameError"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="TypeOfCostsId" class="control-label"></label>
+                <input type="text" list="types" class="form-control" id="typeInput" placeholder="@Localizer["TypeInputPlaceholder"]" />
+                <datalist id="types">
+                    @{
+                        int typeCounter = 0;
+                        foreach (var item in ViewBag.TypesOfCosts)
+                        {
+                            <option value="@item.Name" id="optionTypeValue_@typeCounter"></option>
+                            <input type="hidden" value="@item.Id" asp-for="TypeOfCostsId" id="typeIdInput_@typeCounter" />
+                            typeCounter++;
+                        }
+                    }
+                </datalist>
+                <span asp-validation-for="TypeOfCostsId" class="text-danger" id="typeError"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="TotalAmount" class="control-label"></label>
+                <input asp-for="TotalAmount" type="number" class="form-control" placeholder="@Localizer["AmountInputPlaceholder"]" />
+                <span asp-validation-for="TotalAmount" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                @if (ViewBag.IsManagersCost)
+                {
+                    <input asp-for="IsManagersCost" type="hidden" class="form-control" value="true" />
+                }
+                else
+                {
+                    <input asp-for="IsManagersCost" type="hidden" class="form-control" value="false" />
+                }
+            </div>
+            <div class="form-group text-center mt-2">
+                <button class="btn btn-primary" type="submit" onclick="IsSubmit(@counter, @typeCounter)">@Localizer["ButtonCreate"]</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        function IsSubmit(nameCounter, typeCounter) {
+            event.preventDefault();
+            let isNameCheck = checkName(nameCounter);
+            let isTypeCheck = checkType(typeCounter);
+            console.log(isNameCheck, isTypeCheck);
+            if (isNameCheck === true && isTypeCheck === true){
+                console.log("ok");
+                $('#form').submit();
+            }
+        }
+        function checkName(x) {
+            let name = $('#nameInput').val();
+            const nameArray = name.split(",");
+            if (nameArray.length != 2) {
+                $('#nameError').text('@Localizer["NameError"]');
+                return false;
+            }
+            else if (nameArray[0].replace(/ /g, '') === '' || nameArray[1].replace(/ /g, '') === '') {
+                $('#nameError').text('@Localizer["NameAndUnitNullError"]');
+                return false;
+            }
+            else {
+                let counter1 = 0;
+                let id = 0;
+                for (let i = 0; i < x; i++) {
+                    const nameOfOption = $('#optionValue_' + i).val();
+                    const namesArray = nameOfOption.split(",");
+                    console.log(namesArray);
+                    const nameId = $('#nameIdInput_' + i).val();
+                    if (namesArray[0] === nameArray[0]) {
+                        id = nameId;
+                        counter1++;
+                    }
+                }
+                if (counter1 > 0) {
+                    $('#nameError').text('');
+                    const nameIdInput = document.querySelector('#nameIdInput_' + 0);
+                    nameIdInput.value = id;
+                    return true;
+                }
+                
+                else {
+                    let isTrue = false;
+                    $.ajax({
+                        url: '@Url.Action("Create", "OperatingCostNames")',
+                        type: 'POST',
+                        async: false,
+                        data: { 'name': nameArray[0] + '!', 'unit': nameArray[1] + '!' },
+                        success: function (result) {
+                            $('#nameError').text('');
+                            const nameIdInputVal = document.querySelector('#nameIdInput_' + 0);
+                            nameIdInputVal.value = result;
+                            isTrue = true;
+                        },
+                    });
+                    return isTrue;
+                }
+                
+            }
+        }
+        function checkType(y) {
+            let type = $('#typeInput').val();
+            if (type.replace(/ /g, '') === '') {
+                $('#typeError').text('@Localizer["TypeNullError"]');
+                return false;
+            }
+            else {
+                let typeCounter = 0;
+                let typeId = 0;
+                for (let i = 0; i < y; i++) {
+                    const nameOfType = $('#optionTypeValue_' + i).val();
+                    const currentId = $('#typeIdInput_' + i).val();
+                    if (type === nameOfType) {
+                        typeId = currentId;
+                        typeCounter++;
+                    }
+                }
+                if (typeCounter > 0) {
+                    $('#typeError').text('');
+                    const typeIdInput = document.querySelector('#typeIdInput_' + 0);
+                    typeIdInput.value = typeId;
+                    return true;
+                }
+                else {
+                    let isFalse = false;
+                    $.ajax({
+                        url: '@Url.Action("Create", "TypesOfCosts")',
+                        type: 'POST',
+                        async: false,
+                        data: { 'name': type + '!' },
+                        success: function (result) {
+                            $('#typeError').text('');
+                            const typeIdInputVal = document.querySelector('#typeIdInput_' + 0);
+                            typeIdInputVal.value = result;
+                            isFalse = true;
+                        },
+                    });
+                    return isFalse;
+                }
+            }
+        }
+    </script>
+}

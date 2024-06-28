@@ -1,0 +1,94 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@using TeslaMed.Models
+@model List<Revision>
+@inject IViewLocalizer Localizer
+@{
+    ViewData["Title"] = @Localizer["Title"];
+}
+<a class="btn btn-primary" asp-action="ShowInventoryMainPage">@Localizer["ButtonBack"]</a>
+
+<div class="container">
+    <div class="d-flex justify-content-between">
+        <a asp-controller="Inventory" asp-action="CreateRevision" title="@Localizer["ButtonCreate"]">
+            <i class="bi bi-plus-circle fs-2"></i>
+        </a>
+        <a onclick="openFilterForm()" class="float-end btn" title="@Localizer["BtnFiltering"]">
+            <img src="~/images/icons8-search.svg" class="w-100" style="max-width: 35px" />
+        </a>
+    </div>
+    <h2 class="text-primary text-center">@Localizer["Title"]</h2>
+    <form id="filterForm" method="get" style="display: none;">
+        <div class="row mt-4 mb-4">
+            <div class="col-md-3">
+                <label for="dateFilter">@Localizer["FilterDate"]</label>
+                <input type="date" id="dateFilter" name="dateFilter" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <label for="nameFilter">@Localizer["FilterName"]</label>
+                <input type="text" id="nameFilter" name="nameFilter" class="form-control" />
+            </div>
+            <div class="col-md-3 mt-3 d-flex align-items-center">
+                <button type="submit" class="btn btn-primary me-2">@Localizer["Apply"]</button>
+                <a asp-action="ShowAllRevisions" class="btn btn-secondary">@Localizer["FilteringReset"]</a>
+                <a title="@Localizer["FilteringClose"]" class="btn" onclick="closeFilterForm()">
+                    <img src="~/images/icons8-close.svg" class="w-100" style="max-width: 50px" />
+                </a>
+            </div>
+        </div>
+    </form>
+    @if (Model.Count == 0)
+    {
+        <h3 class="text-danger">@Localizer["Empty"]</h3>
+    }
+    else
+    {
+        <table class="table mt-3" style="width: 100%;">
+            <thead>
+                <tr>
+                    <th scope="col">@Localizer["Date"]</th>
+                    <th scope="col">@Localizer["Name"]</th>
+                    <th scope="col">@Localizer["Unit"]</th>
+                    <th scope="col">@Localizer["Actual"]</th>
+                    <th scope="col">@Localizer["System"]</th>
+                    <th scope="col">@Localizer["Variance"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var d in Model)
+                {
+                    <tr>
+                        <td>@d.Date.ToString("dd.MM.yyyy")</td>
+                        <td>@d.Name</td>
+                        <td>@d.Unit</td>
+                        <td>@d.ActualRemainder @d.Unit</td>
+                        <td>@d.SystemRemainder @d.Unit</td>
+                        @if (@d.Variance == 0)
+                        {
+                            <td class="text-success">@d.Variance @d.Unit</td>
+                        }
+                        else
+                        {
+                            <td class="text-danger">@d.Variance @d.Unit</td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@section Scripts{
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        function openFilterForm() {
+            var form = document.getElementById("filterForm");
+            form.style.display = "block";
+        }
+        function closeFilterForm() {
+            var form = document.getElementById("filterForm");
+            form.style.display = "none";
+        }
+    </script>
+}

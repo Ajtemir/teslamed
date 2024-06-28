@@ -1,0 +1,419 @@
+﻿@using Microsoft.AspNetCore.Localization;
+@using Microsoft.AspNetCore.Mvc.Localization
+
+@inject IViewLocalizer Localizer
+@model TeslaMed.ViewModels.MainPageViewModel;
+@{
+    Layout = null;
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var returnUrl = string.IsNullOrEmpty(Context.Request.Path) ? "~/" : $"~{Context.Request.Path.Value}";
+
+}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/TeslaMed.styles.css" asp-append-version="true" />
+    <link rel="icon" type="image/png" href="~/images/icon.png">
+    <style>    
+        body {
+            background-color: white;
+            color: #0161AB;
+        }
+
+        .navbar {
+            background-color: #0161AB;
+            color: white;
+        }
+
+        .center-button {
+            text-align: center;
+        }
+
+        .welcome-image {
+            text-align: center;
+        }
+
+            .welcome-image img {
+                max-width: 100%;
+                height: auto;
+            }
+
+        .big-text{
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .dropdown-menu .dropdown-item:hover {
+            color: #0161AB !important;
+        }
+
+        .carousel-control-prev,
+        .carousel-control-next {
+            width: auto;
+            margin: 0;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .carousel-control-prev {
+            left: -20px;
+        }
+
+        .carousel-control-next {
+            right: -20px;
+        }
+
+        .carousel-item {
+            position: relative;
+        }
+
+        .carousel-caption {
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: #0161AB; 
+            padding: 20px; 
+        }
+
+            .carousel-caption h3 {
+                font-weight: bold;
+                font-size: 1.5em; 
+                margin-bottom: 50px; 
+            }
+
+            .carousel-caption p {
+                font-size: 1em;
+                max-width: 550px;
+                word-wrap: break-word;
+                text-align: left;
+            }
+
+    </style>
+</head>
+<body>
+    <header style="background-color:#0161AB; height: 110px;">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light">
+            <div class="container-fluid">
+                <a asp-action="MainPage" asp-controller="News">
+                    <img src="~/images/Logo_TESLAMED2.png" alt="teslamedLogo" style="width: 200px;" />
+                </a>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1 py-3">
+                    </ul>
+
+                    <ul class="navbar-nav justify-content-end">
+                        <li class="nav-item mr-5">
+                            <a class="nav-link mb-0 big-text ps-1 text-light btn btn-success" asp-action="GetResults" asp-controller="News">@Localizer["Results"]</a>
+                        </li>
+                        <li class="nav-item dropdown mr-5">
+                            <a class="nav-link dropdown-toggle mb-0 big-text ps-1 text-light headerList" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                @Localizer["ForVisitors"]
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown" style="background-color: #0161AB;">
+                                <li><a class="dropdown-item" asp-action="Index" asp-controller="News" style="color: white;">@Localizer["News"]</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" asp-action="Index" asp-controller="AboutCompany" style="color: white;">@Localizer["AboutCompany"]</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" asp-action="Index" asp-controller="History" style="color: white;">@Localizer["History"]</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" asp-action="Index" asp-controller="Policy" style="color: white;">@Localizer["Policy"]</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" asp-action="Index" asp-controller="Licenses" style="color: white;">@Localizer["Licenses"]</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" asp-action="Index" asp-controller="Equipments" style="color: white;">@Localizer["Equipment"]</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" asp-action="Index" asp-controller="ResearchPreparations" style="color: white;">@Localizer["ResearchPreparation"]</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" asp-action="Index" asp-controller="Privileges" style="color: white;">@Localizer["Priveleges"]</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" asp-action="Index" asp-controller="FAQ" style="color: white;">@Localizer["FAQ"]</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" asp-action="GetResults" asp-controller="News" style="color: white;">@Localizer["Results"]</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item" href="~/ПО.pdf" target="_blank" style="color: white;">Публичная оферта</a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item" href="~/ПК.pdf" target="_blank" style="color: white;">Политика конфиденциальности</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item py-3">
+                            @if (requestCulture.RequestCulture.UICulture.Name == "ru")
+                            {
+                                <a class="navbar-brand d-flex pt-0" asp-area="" asp-action="SetLanguage" asp-controller="Account" asp-route-culture="ky" asp-route-returnUrl="@returnUrl">
+                                    <img src="~/images/flagRU.svg" alt="flagRU" style="max-width: 50px;" /><p class="mb-0 big-text ps-1 text-light">RU</p>
+                                </a>
+                            }
+                            @if (requestCulture.RequestCulture.UICulture.Name == "ky")
+                            {
+                                <a class="navbar-brand d-flex pt-0" asp-area="" asp-action="SetLanguage" asp-controller="Account" asp-route-culture="ru" asp-route-returnUrl="@returnUrl">
+                                    <img src="~/images/flagKG.svg" alt="flagKG" style="max-width: 50px;" /><p class="mb-0 big-text ps-1 text-light">KG</p>
+                                </a>
+                            }
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container mt-5">
+        <h2 class="mb-2 mainTitle">
+            @Localizer["Welcome"]
+        </h2>
+    </div>
+    <div class="mobile-only">
+    <div class="container d-flex justify-content-between align-items-center">
+            <a class="btn btn-success" asp-action="GetResults" asp-controller="News">@Localizer["Results"]</a>
+        <div class="dropdown">
+            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
+                @Localizer["ForVisitors"]
+            </button>
+            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuButton2" style="background-color: #0161AB;">
+                <li><a class="dropdown-item" asp-action="Index" asp-controller="News" style="color: white;">@Localizer["News"]</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" asp-action="Index" asp-controller="AboutCompany" style="color: white;">@Localizer["AboutCompany"]</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" asp-action="Index" asp-controller="History" style="color: white;">@Localizer["History"]</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" asp-action="Index" asp-controller="Policy" style="color: white;">@Localizer["Policy"]</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" asp-action="Index" asp-controller="Licenses" style="color: white;">@Localizer["Licenses"]</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" asp-action="Index" asp-controller="Equipments" style="color: white;">@Localizer["Equipment"]</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" asp-action="Index" asp-controller="ResearchPreparations" style="color: white;">@Localizer["ResearchPreparation"]</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" asp-action="Index" asp-controller="Privileges" style="color: white;">@Localizer["Priveleges"]</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" asp-action="Index" asp-controller="FAQ" style="color: white;">@Localizer["FAQ"]</a></li>
+                <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" asp-action="GetResults" asp-controller="News" style="color: white;">@Localizer["Results"]</a></li>
+                <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item" href="~/ПО.pdf" target="_blank" style="color: white;">Публичная оферта</a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item" href="~/ПК.pdf" target="_blank" style="color: white;">Политика конфиденциальности</a>
+                    </li>
+            </ul>
+        </div>
+    </div>
+    </div>
+    <div class="container text-center mt-4">
+        <div id="imageCarousel" class="carousel slide" data-ride="carousel" data-wrap="true" data-interval="5000">
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <img src="~/images/carousel1.png" class="d-block mx-auto img-fluid" alt="Image 1">
+                </div>
+                <div class="carousel-item">
+                    <img src="~/images/carousel2.png" class="d-block mx-auto img-fluid" alt="Image 2">
+                </div>
+                <div class="carousel-item">
+                    <img src="~/images/carousel3.png" class="d-block mx-auto img-fluid" alt="Image 3">
+                </div>
+                <div class="carousel-item">
+                    <img src="~/images/carousel4.png" class="d-block mx-auto img-fluid" alt="Image 4">
+                </div>
+            </div>
+            <a class="carousel-control-prev" href="#imageCarousel" role="button" data-slide="prev" style="left: 0;">
+                <i class="fa-solid fa-angles-left text-primary fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Previous</span>
+            </a>
+            <a class="carousel-control-next" href="#imageCarousel" role="button" data-slide="next" style="right: 0;">
+                <i class="fa-solid fa-angles-right text-primary fa-2x" aria-hidden="true"></i>
+                <span class="sr-only">Next</span>
+            </a>
+        </div>
+        <div class="mt-4">
+            <a class="btn btn-outline-primary" asp-action="Index" asp-controller="Equipments">Подробнее</a>
+        </div>
+    </div>
+
+
+
+
+
+
+    <div class="container mt-5">
+        @if (Model != null && Model.Publication != null)
+        {
+            <div class="card" style="max-width: 100%;">
+                <div class="row no-gutters">
+                    <div class="col-md-12 col-lg-8">
+                        <div class="card-body">
+                            <h5 class="card-title font-weight-bold">@Model.Publication.Title</h5>
+                            <p class="card-text">@Model.Publication.Description</p>
+                        </div>
+                    </div>
+                    <div class="col-md-12 col-lg-4">
+                        <img src="@Url.Content(Model.Publication.Image)" class="card-img" alt="@Model.Publication.Title" style="max-width: 100%; max-height: 100%;">
+                    </div>
+                </div>
+                <ul class="list-group list-group-flush">
+                    @if (Model.Publication.Links != null)
+                    {
+                        @foreach (var link in Model.Publication.Links)
+                        {
+                            <li class="list-group-item">
+                                <a href="@link.Url">@link.Title</a>
+                            </li>
+                        }
+                    }
+                </ul>
+                <div class="card-footer text-center">
+                    <a class="btn btn-outline-primary" asp-action="Index" asp-controller="News">@Localizer["MoreNews"]</a>
+                </div>
+            </div>
+        }
+    </div>
+    <section class="container mt-5">
+        <div class="row">
+            <div class="col-md-12 col-lg-4">
+                <div class="text-center">
+                    <i class="fas fa-stethoscope fa-4x"></i>
+                    <h3 class="mainMiniTitle">@Localizer["MedicalServices"]</h3>
+                    <p>@Localizer["MedicalServicesText"]</p>
+                </div>
+            </div>
+            <div class="col-md-12 col-lg-4">
+                <div class="text-center">
+                    <i class="fas fa-user-md fa-4x"></i>
+                    <h3>@Localizer["ExperiencedDoctors"]</h3>
+                    <p>@Localizer["DoctorsText"]</p>
+                </div>
+            </div>
+            <div class="col-md-12 col-lg-4">
+                <div class="text-center">
+                    <i class="fas fa-calendar fa-4x"></i>
+                    <h3>@Localizer["PreEntry"]</h3>
+                    <p>@Localizer["PreEntryText"]</p>
+                    <button class="btn btn-primary" data-toggle="modal" data-target="#appointmentModal">@Localizer["AppointmentButton"]</button>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="container mt-5">
+        @if (Model != null && Model.MainDoctors != null && Model.MainDoctors.Count > 0)
+        {
+            @if (User.IsInRole("admin") || User.IsInRole("manager"))
+            {
+                <div class="text-center">
+                    <a class="btn btn-primary text-center" asp-action="AddMainDoctor" asp-controller="News">Добавить врача</a>
+                </div>
+            }
+            <div class="row mt-3 justify-content-around">
+                @foreach (var doctor in Model.MainDoctors)
+                {
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100" style="max-width: 100%;">
+                            @if (User.IsInRole("admin") || User.IsInRole("manager"))
+                            {
+                                <div class="card-header">
+                                    <a class="btn btn-outline-danger ms-2" onclick="delObj('@doctor.Id')">Удалить</a>
+                                </div>
+                            }
+                            <img src="@Url.Content(doctor.Image)" class="card-img-top d-flex" alt="@doctor.FullName" style="max-width: 100%; max-height: 100%;">
+                            <div class="card-body">
+                                <h5 class="card-title">@doctor.FullName</h5>
+                                <p class="card-text">@doctor.Description</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            @if (User.IsInRole("admin") || User.IsInRole("manager"))
+            {
+                <div class="text-center">
+                    <a class="btn btn-primary text-center" asp-action="AddMainDoctor" asp-controller="News">Добавить врача</a>
+                </div>
+            }
+        }
+    </div>
+
+       <footer class="mt-5 text-center" style="background-color: #0161AB; color: white; text-align: justify; padding: 20px;">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <a class="text-decoration-none text-white" href="tel:@Model.Phone1.Trim()"><i class="fas fa-mobile-screen-button"></i> @Model.Phone1</a>
+                    <br>
+                    <a class="text-decoration-none text-white" href="tel:@Model.Phone2.Trim()"><i class="fas fa-phone"></i> @Model.Phone2</a>
+                    <br>
+                    <a class="text-decoration-none text-white" href="tel:@Model.Phone3.Trim()"><i class="fas fa-phone"></i> @Model.Phone3</a>
+                </div>
+                <div class="col-md-4 d-flex justify-content-center align-items-center">
+                    <i class="fas fa-at"></i>
+                    <a class="text-decoration-none text-white ms-2" href="mailto:@Model.Email">@Model.Email</a>
+                </div>
+                <div class="col-md-4 d-flex justify-content-end align-items-center">
+                    <a class="text-decoration-none text-white" href="https://www.google.com/maps?q=@Model.Address"><i class="fas fa-location-dot"></i> @Model.Address</a>
+            </div>
+            @if(User.IsInRole("admin") || User.IsInRole("manager")){
+                <a class="btn btn-success mt-2" asp-action="EditFooter" asp-controller="News">Редактировать</a>
+            }
+        </div>
+    </div>
+</footer>
+    <div class="modal fade" id="appointmentModal" tabindex="-1" role="dialog" aria-labelledby="appointmentModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="appointmentModalLabel">@Localizer["PreEntry"]</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="@Localizer["CloseButton"]">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="appointmentForm" asp-action="SendMessage" asp-controller="News">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="name">@Localizer["FullName"]</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phoneNumber">
+                                @Localizer["PhoneNumber"]
+                            </label>
+                            <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="complaints">@Localizer["Complaints"]</label>
+                            <textarea class="form-control" id="complaints" name="complaints" rows="4" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">@Localizer["CloseButton"]</button>
+                        <button type="submit" class="btn btn-primary" form="appointmentForm">@Localizer["AppointmentButton"]</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        $(document).ready(function () {
+            window.delObj = function (id) {
+                let deleteConfirm = confirm('@Localizer["DeleteDoctorConfirmation"]');
+                if (deleteConfirm) {
+                    window.location.href = '@Url.Action("RemoveMainDoctor", "News")?id=' + id;
+                }
+            };
+        });
+    </script>
+</body>
+</html>

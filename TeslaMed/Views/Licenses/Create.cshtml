@@ -1,0 +1,22 @@
+﻿@using Microsoft.AspNetCore.Localization;
+@using Microsoft.AspNetCore.Mvc.Localization
+@model TeslaMed.Models.Licences
+@inject IViewLocalizer Localizer
+<div class="container">
+    <h1 class="text-center" style="color: #0161AB;">
+        @Localizer["LicensesCreate"]
+    </h1>
+    <h3 class="text-center" style="color: #0161AB;">@Localizer["ChooseAtLeastOne"]</h3>
+
+    @Html.ValidationSummary(true)
+
+    <form asp-action="Create" asp-controller="Licenses" method="post" enctype="multipart/form-data">
+        <div class="form-group text-center">
+            <input type="file" name="photos" class="form-control" multiple />
+            <span asp-validation-for="Photos" class="text-danger"></span>
+        </div>
+        <div class="form-group text-center">
+            <input type="submit" value="@Localizer["Ready"]" class="btn btn-success mt-3" />
+        </div>
+    </form>
+</div>

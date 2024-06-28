@@ -1,0 +1,23 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@model TeslaMed.ViewModels.DiagnosticsCreateViewModel;
+
+@if (Model.Doctors.Count == 0)
+{
+    <option value="" hidden>@Localizer["EmptyUserDoctors"]</option>
+}
+else
+{
+    <option value="" hidden>@Localizer["DoctorSelection"]</option>
+    @foreach (var item in Model.Doctors)
+    {
+        @if (item.Patronymic == null)
+        {
+            <option value="@item.Id">@item.Surname @item.Name </option>
+        }
+        else
+        {
+            <option value="@item.Id">@item.Surname @item.Name @item.Patronymic</option>
+        }
+    }
+}

@@ -1,0 +1,133 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@model TeslaMed.Models.News
+
+<div class="container">
+    <h1 class="text-center">@Localizer["NewsPublication"]</h1>
+    <form method="post" asp-controller="News" asp-action="Create" enctype="multipart/form-data">
+        <div class="row">
+            <div class="col-md-8 m-auto">
+                <div class="border p-3">
+                    <div asp-validation-summary="All" class="text-danger"></div>
+                    <div class="mb-3">
+                        <input asp-for="Title" class="form-control" placeholder="@Localizer["Заголовок"]">
+                    </div>
+
+                    <div class="mb-3">
+                        <input asp-for="Image" type="file" name="file" class="form-control" aria-label="Upload">
+                    </div>
+
+                    <div class="mb-3">
+                        <textarea asp-for="Description" class="form-control" placeholder="@Localizer["Description"]"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <h4>@Localizer["Links"]</h4>
+                        <button type="button" id="addLink" class="btn btn-success">@Localizer["AddLink"]</button>
+                        <button type="button" id="toggleLinkContainer" class="btn btn-danger">@Localizer["CloseLink"]</button>
+                    </div>
+
+                    <div id="linkContainer">
+                        @if (Model.Links != null)
+                        {
+                            for (int i = 0; i < Model.Links.Count; i++)
+                            {
+                                <div class="mb-3" style="display: none;">
+                                    <input asp-for="Links[i].Title" class="form-control" placeholder="@Localizer["LinkTitle"]">
+                                    <span asp-validation-for="@Model.Links[i].Title" class="text-danger"></span>
+                                </div>
+                                <div class="mb-3" style="display: none;">
+                                    <input asp-for="Links[i].Url" class="form-control" placeholder="@Localizer["LinkUrl"]">
+                                    <span asp-validation-for="@Model.Links[i].Url" class="text-danger"></span>
+                                </div>
+                            }
+                        }
+                    </div>
+
+                    <input asp-for="EditDate" value="@null" hidden />
+                    <div class="text-center mb-3">
+                        <input class="btn btn-primary" id="publishButton" type="submit" value="@Localizer["Post"]" />
+                        <p id="publishText" class="text-danger" style="display: none;">@Localizer["LinkFieldsRequired"]</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function () {
+            var linkIndex = @Model.Links.Count;
+            var linkContainer = $("#linkContainer");
+            var addLinkButton = $("#addLink");
+            var toggleLinkContainerButton = $("#toggleLinkContainer");
+            var publishButton = $("#publishButton");
+            var publishText = $("#publishText");
+
+            function checkLinkFields() {
+                var linkTitles = document.querySelectorAll(".link-title");
+                var linkUrls = document.querySelectorAll(".link-url");
+
+                for (var i = 0; i < linkTitles.length; i++) {
+                    if (linkTitles[i].value && !linkUrls[i].value) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            addLinkButton.click(function () {
+                var linkHtml = `<div class="link-group">
+                                                <div class="mb-3">
+                                                            <input type="text" name="Links[${linkIndex}].Title" class="form-control link-title" placeholder="@Localizer["LinkTitle"]">
+                                                    <span asp-validation-for="Links[${linkIndex}].Title" class="text-danger"></span>
+                                                </div>
+                                                <div class="mb-3">
+                                                            <input type="text" name="Links[${linkIndex}].Url" class="form-control link-url" placeholder="@Localizer["LinkUrl"]">
+                                                    <span asp-validation-for="Links[${linkIndex}].Url" class="text-danger"></span>
+                                                </div>
+                                            </div>`;
+                linkContainer.append(linkHtml);
+                linkIndex++;
+            });
+
+            toggleLinkContainerButton.click(function () {
+                var lastLinkGroup = linkContainer.find(".link-group").last();
+                if (lastLinkGroup.length) {
+                    lastLinkGroup.remove();
+                    linkIndex--;
+
+                    if (!checkLinkFields()) {
+                        publishButton.hide();
+                        publishText.show();
+                    } else {
+                        publishButton.show();
+                        publishText.hide();
+                    }
+                } else {
+                    publishButton.show();
+                    publishText.hide();
+                }
+            });
+
+            addLinkButton.click(function () {
+                publishButton.hide();
+                publishText.show();
+            });
+
+            linkContainer.on("input", ".link-title, .link-url", function () {
+                if (!checkLinkFields()) {
+                    publishButton.hide();
+                    publishText.show();
+                } else {
+                    publishButton.show();
+                    publishText.hide();
+                }
+            });
+        });
+    </script>
+}

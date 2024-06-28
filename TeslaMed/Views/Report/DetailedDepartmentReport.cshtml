@@ -1,0 +1,112 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+@model List<Diagnostics>
+
+@{
+    ViewData["Title"] = Localizer["Title"];
+    var totalResult = new List<int>{0, 0, 0};
+}
+
+<a asp-action="ShowReportMainPage" class="btn btn-primary">@Localizer["BackToMainPage"]</a>
+<div class="mt-3 mb-3">
+    <form method="get" asp-action="@ViewContext.RouteData.Values["Action"]">
+        <div class="row justify-content-lg-center ms-md-5 me-0">
+             <div class="col-lg-3">
+                <select name="department" class="form-control">
+                    <option value="">@Localizer["AllDepartments"]</option>
+                    @foreach (var place in ViewBag.Departments)
+                    {
+                        <option value="@place.Id">@place.Name</option>
+                    }
+                </select>
+            </div>   
+            <div class="col-lg-3 d-flex">
+                <label class="mt-1 me-1" for="firstDate">@Localizer["From"]:</label>
+                <input type="date" name="firstDate" class="form-control" />
+            </div>
+            <div class="col-lg-3 d-flex">
+                <label class="mt-1 me-1" for="secondDate">@Localizer["To"]:</label>
+                <input type="date" name="secondDate" class="form-control" />
+            </div>           
+            <div class="col-lg-1 d-flex justify-content-lg-start justify-content-center" >
+                <button type="submit" class="p-0 border-0 bg-transparent" style="max-width: 38px" title="@Localizer["FilteringApplyReset"]">
+                    <img style="max-height: 38px" src="~/images/icons8-search.svg"/>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div>
+    <div class="text-center">
+    <h4 class="mb-0">@Localizer[$"{ViewBag.ReportType}"] @Localizer["Title"]:</h4>
+        <div>
+            @if (ViewBag.DateFilterFrom != null)
+            {
+                <span class="mb-0">@Localizer["From"] @ViewBag.DateFilterFrom.ToString("dd.MM.yyyy HH:mm")</span>
+            }
+            @if (ViewBag.DateFilterTo != null)
+            {
+                <span class="mb-0">@Localizer["To"] @ViewBag.DateFilterTo.ToString("dd.MM.yyyy HH:mm")</span>
+            }
+        </div>
+    </div>
+    @if (Model.Count == 0)
+    {
+        <p class="text-center">@Localizer["EmptyDiagnosticsList"]</p>
+    }
+    else
+    {  
+        <div style="max-width: 750px;">
+            <table class="table table-borderless mt-1">
+                <thead>
+                    <tr>
+                        <th>@Localizer["Department"]</th>
+                        <th>@Localizer["TypesOfDiagnosticsCount"]</th>
+                        <th>@Localizer["TypesOfDiagnosticsPrice"]</th>
+                        <th>@Localizer["DiagnosticsBeenPaid"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var department in Model.Select(d => d.Department).Distinct())
+                    {
+                        var diags = DepartmentResult(Model.Where(d => d.Department == department).ToList(), ref totalResult);
+                        <tr style="border-style: none;">
+                            <th>@department.Name</th>
+                            <th>@diags[0]</th>
+                            <th>@diags[1]</th>
+                            <th>@diags[2]</th>
+                        </tr>
+                    }
+                    <tr style="border-top: 1px solid black;">
+                        <th>@Localizer["TotalResult"]:</th>
+                        <th>@totalResult[0]</th>
+                        <th>@totalResult[1]</th>
+                        <th>@totalResult[2]</th>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@functions
+{
+    private List<int> DepartmentResult (List<Diagnostics> diagList, ref List<int> totalResult)
+    {
+        int typesTotalCount = 0;
+        int typesTotalPrice = 0;
+        int diagTotalBeenPaid = 0;
+        foreach (var diag in diagList)
+        {
+            typesTotalCount += diag.TypesOfDiagnostics.Count;
+            typesTotalPrice += diag.TotalCost;
+            diagTotalBeenPaid += (int)diag.BeenPaid;
+        }
+        var result = new List<int> { typesTotalCount, typesTotalPrice, diagTotalBeenPaid };
+        for (int i = 0; i < 3; i++)
+            totalResult[i] += result[i];
+        return result;
+    }
+}

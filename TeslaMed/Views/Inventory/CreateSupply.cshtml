@@ -1,0 +1,51 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+
+@inject IViewLocalizer Localizer
+@model TeslaMed.Models.Supply
+
+@{
+    ViewData["Title"] = @Localizer["Header"];
+}
+
+<a class="btn btn-primary" asp-action="IndexSupply">@Localizer["ButtonBack"]</a>
+
+<div class="row justify-content-around ms-0 me-0">
+    <div class="col col-sm-8 col-md-6 col-lg-5 col-xl-4 col-xxl-4">
+        <form asp-action="CreateSupply" method="post" id="form">
+            <h4 class="mb-3 text-center">@Localizer["Header"]</h4>
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group mb-3">
+                <label asp-for="InventoryId" class="control-label"></label>
+                <select asp-for="InventoryId" onclick="docSelect()" class="form-select">
+                    @if (ViewBag.Inventories.Count == 0)
+                    {
+                        <option value="" hidden>@Localizer["NullListError"]</option>
+                    }
+                    else
+                    {
+                        <option value="" hidden>@Localizer["ChooseType"]</option>
+                        @foreach (var item in ViewBag.Inventories)
+                        {
+                            <option value="@item.Id">@item.InventoryName.Name</option>
+                        }
+                    }
+                </select>
+                <span asp-validation-for="InventoryId" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="SupplyQuantity" class="control-label"></label>
+                <input asp-for="SupplyQuantity" type="number" class="form-control" />
+                <span asp-validation-for="SupplyQuantity" class="text-danger" id="nameError"></span>
+            </div>
+            <div class="form-group text-center mt-2">
+                <button class="btn btn-primary" type="submit">@Localizer["ButtonCreate"]</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

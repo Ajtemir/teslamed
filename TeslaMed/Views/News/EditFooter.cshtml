@@ -1,0 +1,42 @@
+@using Microsoft.AspNetCore.Mvc.Localization
+
+@inject IViewLocalizer Localizer
+@model TeslaMed.ViewModels.FooterSettingsViewModel
+
+@{
+    ViewData["Title"] = "Edit Footer";
+}
+
+<div class="container">
+    <h2 class="text-center">@Localizer["Title"]</h2>
+    <div class="d-flex justify-content-center align-items-center">
+    <form asp-action="SaveFooter" asp-controller="News" method="post">
+        <div class="form-group text-center">
+            <label asp-for="Phone1"></label>
+            <input asp-for="Phone1" class="form-control" value="@Model.Phone1"/>
+        </div>
+
+        <div class="form-group text-center">
+            <label asp-for="Phone2"></label>
+            <input asp-for="Phone2" class="form-control" value="@Model.Phone2"/>
+        </div>
+            <div class="form-group text-center">
+                <label asp-for="Phone3"></label>
+                <input asp-for="Phone3" class="form-control" value="@Model.Phone3" />
+            </div>
+        <div class="form-group text-center">
+            <label asp-for="Email"></label>
+            <input asp-for="Email" class="form-control" value="@Model.Email"/>
+        </div>
+
+        <div class="form-group text-center">
+            <label asp-for="Address"></label>
+            <input asp-for="Address" class="form-control" value="@Model.Address"/>
+        </div>
+        <div class="form-group text-center mt-3">
+        <button type="submit" class="btn btn-primary">@Localizer["Save"]</button>
+        <a class="btn btn-danger" asp-action="MainPage" asp-controller="News">@Localizer["Back"]</a>
+        </div>
+    </form>
+    </div>
+</div>

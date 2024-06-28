@@ -1,0 +1,45 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+
+@inject IViewLocalizer Localizer
+@model TeslaMed.Models.User
+
+@{
+    ViewData["Title"] = @Localizer["Title"];
+}
+<h3>@Localizer["Header"]</h3>
+<div class="container">
+    <hr />
+    <table class="table table-striped">
+        <tr>
+            <th>@Localizer["Name"]</th>
+            <td>@Model.Name</td>
+        </tr>
+        <tr>
+            <th>@Localizer["Surname"]</th>
+            <td>@Model.Surname</td>
+        </tr>
+        
+                @if (Model.Patronymic != null)
+                {
+                <tr>
+                  <th>@Localizer["Patronymic"]</th>
+                  <td>
+                      @Model.Patronymic
+                  </td>
+                </tr>
+                }
+
+        <tr>
+            <th>@Localizer["Post"]</th>
+            <td>@Model.Post</td>
+        </tr>
+       
+    </table>
+    <div class="mb-3 mt-3 text-center">
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="Id" />
+            <input type="submit" value=@Localizer["ButtonDelete"] class="btn btn-danger" />
+            <a asp-action="Edit" asp-controller="Account" asp-route-id="@Model.Id" class="btn btn-primary">@Localizer["ButtonBack"]</a>
+    </form>
+    </div>
+</div>

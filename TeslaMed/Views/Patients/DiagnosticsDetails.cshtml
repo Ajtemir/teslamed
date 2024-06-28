@@ -1,0 +1,437 @@
+@using TeslaMed.ViewModels
+@using Microsoft.AspNetCore.Mvc.Localization
+
+@inject IViewLocalizer Localizer
+@model Diagnostics;
+
+@{
+    ViewData["Title"] = Localizer["Title"];
+    List<TypeOfDiagnostics> typesOfDiagnostics = new List<TypeOfDiagnostics>();
+    var textColot = (int? paid, int totalCost) => paid == totalCost ? "text-success" : "text-danger";
+    List<Pre_entry> entries  = ViewBag.Entries;
+}
+
+<div>
+    <div class="me-4 ms-3" >
+        <h4 class="text-center">@Localizer["Header"]</h4>
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="">
+                    <div class="me-3">
+                        <table>
+                            <tr>
+                                <td class="fw-bold pb-3">@Localizer["Code"]</td>
+                                <td class="ps-2 pb-3">@Model.Patient.Code</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="me-3">
+                        <table>
+                            <tr>
+                                <td class="fw-bold pb-3">@Localizer["Name"]</td>
+                                <td class="ps-2 pb-3">@Model.Patient.Name</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="me-3">
+                        <table>
+                            <tr>
+                                <td class="fw-bold pb-3">@Localizer["Surname"]</td>
+                                <td class="ps-2 pb-3">@Model.Patient.Surname</td>
+                            </tr>
+                        </table>
+                    </div>
+                    @if(@Model.Patient.Patronymic != null)
+                        {
+                            <div class="me-3">
+                                <table>
+                                    <tr>
+                                        <td class="fw-bold pb-3">@Localizer["Patronymic"]</td>
+                                        <td class="ps-2 pb-3">@Model.Patient.Patronymic</td>
+                                    </tr>
+                                </table> 
+                            </div>
+                        }
+                    <div class="me-3">
+                        <table>
+                            <tr>
+                                <td class="fw-bold pb-3">@Localizer["Gender"]</td>
+                                <td class="ps-2 pb-3">@Model.Patient.Gender</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="me-3">
+                        <table>
+                            <tr>
+                                <td class="fw-bold pb-3">@Localizer["DateOfBirth"]</td>
+                                <td class="ps-2 pb-3">@Model.Patient.BirthDate.ToShortDateString()</td>
+                            </tr>
+                        </table>
+                    </div>
+                    @if(Model.Patient.PhoneNumber != null)
+                    {
+                        <div class="me-3">
+                        <table>
+                            <tr>
+                                <td class="fw-bold pb-3">@Localizer["PhoneNumber"]</td>
+                                <td class="ps-2 pb-3">@Model.Patient.PhoneNumber</td>
+                            </tr>
+                        </table>
+                        </div>
+                    }
+                    @if(Model.Patient.SecondPhoneNumber != null)
+                    {
+                        <div class="me-3">
+                        <table>
+                            <tr>
+                                <td class="fw-bold pb-3">@Localizer["SecondPhoneNumber"]</td>
+                                <td class="ps-2 pb-3">@Model.Patient.SecondPhoneNumber</td>
+                            </tr>
+                        </table>
+                        </div>
+                    }
+                    <div class="me-3">
+                        <table>
+                            <tr>
+                                <td class="fw-bold pb-3">@Localizer["Date"]</td>
+                                <td class="ps-2 pb-3">@Model.TimeArrival.ToShortDateString()</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="me-3">
+                        <table>
+                            <tr>
+                                <td class="fw-bold pb-3">@Localizer["Time"]</td>
+                                <td class="ps-2 pb-3">@Model.TimeArrival.ToShortTimeString()</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="me-3">
+                        <table>
+                            <tr>
+                                <td class="fw-bold pb-3">@Localizer["Anamnesis"]</td>
+                            </tr>
+                        </table>
+                        <p class="ms-5">@Model.Anamnesis</p>
+                    </div>
+                    <div class="me-3">
+                        <table>
+                            <tr>
+                                <td class="fw-bold pb-3">@Localizer["ArrivalType"]</td>
+                                <td class="ps-2 pb-3">@Model.ArrivalType.Name</td>
+                            </tr>
+                        </table>
+                    </div class="me-3">
+                    @if (Model.ArrivalTypeDoctor != null)
+                    {
+                        <div>
+                            <table>
+                            <tr>
+                                <td class="fw-bold pb-3">@Localizer["FreelanceDoctor"]</td>
+                                @if (Model.ArrivalTypeDoctor.Patronymic != null)
+                                {
+                                    <td class="ps-2 pb-3">@Model.ArrivalTypeDoctor.Name @Model.ArrivalTypeDoctor.Surname @Model.ArrivalTypeDoctor.Patronymic</td>
+                                }
+                                else
+                                {
+                                    <td class="ps-2 pb-3">@Model.ArrivalTypeDoctor.Name @Model.ArrivalTypeDoctor.Surname</td>
+                                }
+                            </tr>
+                            </table>
+                        </div>
+                    }
+                    <div class="border-top-1 border border-dark mt-3 mb-3"></div>
+
+                    @foreach (TypeOfDiagnostics typeOfDiagnostics in Model.TypesOfDiagnostics)
+                    {
+                        <div class="me-3">
+                            <table>
+                                <tr>
+                                    <td class="fw-bold pb-3">@Localizer["TypeOfDiagnostics"]</td>
+                                    <td class="ps-2 pb-3">@typeOfDiagnostics.ResearchMethod.Name @typeOfDiagnostics.Name @Localizer["Price"] @typeOfDiagnostics.Price</td>
+                                </tr>
+                            </table>
+                            <div>
+                                @if(entries.Count != 0)
+                                {
+                                    @if (entries.FirstOrDefault(d => d.TypeOfDiagnosticsId == typeOfDiagnostics.Id) != null)
+                                    {
+                                        <div class="d-flex">
+                                            <p class="fw-bold me-2">@Localizer["BeginningOfResearchTime"]</p>
+                                            <p class="me-2">@entries.FirstOrDefault(d => d.TypeOfDiagnosticsId == typeOfDiagnostics.Id).StartTime.ToShortDateString()</p>
+                                            <p>@entries.FirstOrDefault(d => d.TypeOfDiagnosticsId == typeOfDiagnostics.Id).StartTime.ToShortTimeString()</p>
+                                        </div>
+                                        <div class="d-flex">
+                                            <p class="fw-bold me-2">@Localizer["EndOfResearchTime"]</p>
+                                            <p class="me-2">@entries.FirstOrDefault(d => d.TypeOfDiagnosticsId == typeOfDiagnostics.Id).EndTime.ToShortDateString()</p>
+                                            <p>@entries.FirstOrDefault(d => d.TypeOfDiagnosticsId == typeOfDiagnostics.Id).EndTime.ToShortTimeString()</p>
+                                        </div>
+                                    }
+                                }
+                                
+                            </div>
+                            <div>
+                                @{
+                                    var dicomPathModel = Model.DicomPathAndImagesPaths.FirstOrDefault(d => d.TypeOfDiagnosticsId == typeOfDiagnostics.Id);
+                                    @if(dicomPathModel != null)
+                                    {
+                                        if(dicomPathModel.Rating != null)
+                                        {
+                                        <div class="d-flex">
+                                            <p class="fw-bold me-2">@Localizer["Rating"]</p>
+                                            <p class="me-2">@Localizer[$"{dicomPathModel.Rating}"]</p>
+                                        </div>
+                                        }
+                                        @if(dicomPathModel.Conclusion != null){
+                                        <div class="d-flex">
+                                            <p class="fw-bold me-2">@Localizer["Conclusion"]: </p>
+                                            <p class="me-2">@dicomPathModel.Conclusion</p>
+                                        </div>
+                                        }
+                                    }
+                                }
+                            </div>
+                            <div class="mb-3">
+                                @if (User.IsInRole("x-ray_laboratory_assistant") && Model.Laborant?.UserName == User.Identity.Name || User.IsInRole("admin") && Model.LaborantId != null)
+                                {
+                                    <a class="btn btn-primary" asp-action="SaveDicomFile" asp-controller="Patients" asp-route-diagnosticsId="@Model.Id" asp-route-typeOfDiagnosticsId="@typeOfDiagnostics.Id">@Localizer["DicomDownload"]</a>
+                                }
+                                @if(Model.DicomPathAndImagesPaths.Count != 0)
+                                {
+                                    @if (Model.DicomPathAndImagesPaths.FirstOrDefault(d => d.TypeOfDiagnosticsId == typeOfDiagnostics.Id) != null)
+                                    {
+                                        @if (Model.DicomPathAndImagesPaths.FirstOrDefault(d => d.TypeOfDiagnosticsId == typeOfDiagnostics.Id).IsDicomDownload == true)
+                                        {
+                                            //<a class="btn btn-primary ms-3" asp-action="ShowDicomImages" asp-controller="Patients" asp-route-diagnosticsId="@Model.Id" asp-route-typeOfDiagnosticsId="@typeOfDiagnostics.Id">@Localizer["View"]</a>
+                                            <a class="btn btn-outline-primary ms-3" asp-action="DicomFileDownload" asp-controller="Patients" asp-route-diagnosticsId="@Model.Id" asp-route-id="@Model.DicomPathAndImagesPaths.FirstOrDefault(d => d.TypeOfDiagnosticsId == typeOfDiagnostics.Id).Id">@Localizer["DowloadDicom"]</a>
+                                        }
+                                    }
+                                }
+                                @if ((User.IsInRole("doctor") || User.IsInRole("admin")) && Model.DicomPathAndImagesPaths.Count != 0)
+                                {
+                                    @if (Model.DicomPathAndImagesPaths.FirstOrDefault(d => d.TypeOfDiagnosticsId == typeOfDiagnostics.Id) != null)
+                                    {
+                                        <div class="mt-2 mb-4">
+                                            @if (Model.DicomPathAndImagesPaths.FirstOrDefault(d => d.TypeOfDiagnosticsId == typeOfDiagnostics.Id).IsDicomDownload == true)
+                                            {
+                                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#report_@typeOfDiagnostics.Id">@Localizer["RatingLoadingButton"]</button>
+                                            }
+                                            <button type="button" class="btn btn-primary ms-3" data-bs-toggle="modal" data-bs-target="#anotherModal_@typeOfDiagnostics.Id">@Localizer["ConclusionLoadingButton"]</button>
+                                            <a asp-action="DownloadConclusion" asp-controller="Pdf" class="btn btn-outline-primary ms-3" asp-route-id="@dicomPathModel.Id" asp-route-patientId="@Model.PatientId" asp-route-diagnosticsId="@Model.Id">@Localizer["ConclusionDownloadingButton"]</a>
+                                        </div>
+                                        <div class="border-top-1 border border-dark"></div>
+                                        <div class="modal fade" id="report_@typeOfDiagnostics.Id" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h1 class="modal-title fs-5" id="exampleModalLabel">@Localizer["RatingHeader"]</h1>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        @{
+                                                            @await Html.PartialAsync("PartialViews/ReportPartialView.cshtml", 
+                                                        new ReportViewModel() {DiagnosticId = Model.Id, TypeOfDiagnosticId = typeOfDiagnostics.Id, Rating = dicomPathModel.Rating, Conclusion = dicomPathModel.Conclusion})
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal fade" id="anotherModal_@typeOfDiagnostics.Id" tabindex="-1" aria-labelledby="anotherModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h1 class="modal-title fs-5" id="anotherModalLabel">@Localizer["Conclusion"]</h1>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        @{
+                                                            @await Html.PartialAsync("PartialViews/ConclusionPartialView.cshtml", 
+                                                        new ReportViewModel() {DiagnosticId = Model.Id, TypeOfDiagnosticId = typeOfDiagnostics.Id, Rating = dicomPathModel.Rating, Conclusion = dicomPathModel.Conclusion})
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    }
+                    @if(@Model.Discount != null)
+                        {
+                    <div class="me-3">
+                        <table>
+                            <tr>
+                                <td class="fw-bold pb-3">@Localizer["Discount"]</td>
+                                <td class="ps-2 pb-3">@Model.Discount.Name @Localizer["Persent"] @Model.Discount.Percent</td>
+                            </tr>
+                        </table>
+                    </div>
+                        }
+                    <div class="me-3">
+                        <table>
+                            <tr>
+                                <td class="fw-bold pb-3">@Localizer["StaffDoctor"]</td>
+                                @if (@Model.Doctor.Patronymic != null)
+                                {
+                                    <td class="ps-2 pb-3">@Model.Doctor.Name @Model.Doctor.Surname @Model.Doctor.Patronymic</td>
+                                }   
+                                else
+                                {
+                                    <td class="ps-2 pb-3">@Model.Doctor.Name @Model.Doctor.Surname</td>
+                                }
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="me-3">
+                        <table>
+                            <tr>
+                                <td class="fw-bold pb-3">@Localizer["Paid"]</td>
+                                @if (@Model.BeenPaid == null)
+                                {
+                                    <td class="ps-2 pb-3 text-danger">0</td>
+                                }
+                                else
+                                {
+                                    <td class="ps-2 pb-3 @textColot(Model.BeenPaid, Model.TotalCost)">@Model.BeenPaid</td>
+                                }
+                            </tr>
+                        </table>
+                    </div>
+                    @if (Model.Debt != 0)
+                    {
+                        <div class="me-3">
+                            <table>
+                                <tr>
+                                    <td class="fw-bold pb-3">@Localizer["Debt"]</td>
+                                    <td class="ps-2 pb-3 text-danger">@Model.Debt</td>
+                                </tr>
+                            </table>
+                        </div>
+                    }
+                    <div class="me-3">
+                        <table>
+                            <tr>
+                                <td class="fw-bold pb-3">@Localizer["Status"]</td>
+                                <td class="ps-2 pb-3">@Model.Status</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="me-3">
+                        <table>
+                            <tr>
+                                <td class="fw-bold pb-3">@Localizer["ImageStatus"]</td>
+                                <td id ="imgStatus_" class="ps-2 pb-3 @StatusResult(Model.ImagesStatus)[1]">@Localizer[Model.ImagesStatus]</td>
+                            </tr>
+                        </table>
+                    </div>
+                    @if (Model.SmsDeliveryStatus != null)
+                    {
+                        <div class="me-3">
+                            <table>
+                                <tr>
+                                    <td class="fw-bold pb-3">@Localizer["CustomerNotificationStatus"]:</td>
+                                    <td class="ps-2 pb-3">@Localizer[$"{Model.SmsDeliveryStatus}"]</td>
+                                </tr>
+                            </table>
+                        </div>   
+                    }
+                    <div class=" d-flex justify-content-between">
+                        <div class="d-flex">
+                            @if (User.IsInRole("x-ray_laboratory_assistant") && (Model.Laborant?.UserName == User.Identity.Name || Model.Laborant?.UserName == null))
+                            {
+                                <div class="me-3">
+                                    <a class="btn btn-primary" id="actionName_" asp-action="DiagnosticChangeImagesStatus" asp-route-id="@Model.Id">
+                                        <text>@StatusResult(Model.ImagesStatus)[0]</text>
+                                    </a>
+                                </div>
+                            }
+                            @if (User.IsInRole("x-ray_laboratory_assistant") && Model.Laborant?.UserName == User.Identity.Name)
+                            {
+                                <div class="me-3">
+                                    <a class="btn btn-danger" id="actionName_" asp-action="RejectDiagnostic" asp-route-id="@Model.Id">@Localizer["Refuse"]</a>
+                                </div>
+                            }
+                        </div>
+                        <div>
+                            @if (Model.DiagnosticLog.LogList != null)
+                            {
+                            <div class="me-3">
+                                <p class="d-inline-flex">
+                                    <button class="btn btn-primary justify-content-end" type="button" data-bs-toggle="collapse" data-bs-target="#laborantLog" aria-expanded="false" aria-controls="laborantLog">
+                                        @Localizer["LaborantStatusLog"]
+                                    </button>
+                                </p>
+                            </div>
+                            <div class="collapse" id="laborantLog">
+                                    <div class="card card-body">
+                                            @foreach (var d in Model.DiagnosticLog.LogList)
+                                            {
+                                                <p>@d.Split(" ")[0] @d.Split(" ")[1] @Localizer["Laborant"] @d.Split(" ")[3] @d.Split(" ")[4] @Localizer[d.Split(" ")[2]]</p>
+                                            }     
+                                    </div>
+                                </div>
+                            }
+                        </div>                        
+                    </div>
+                    @if (Model.IsPaidInfull == false && (User.IsInRole("admin") || User.IsInRole("registrar")))
+                    {
+                        <div class="mt-3">
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#payment_">@Localizer["Payment"]</button>
+                            <a onclick="delDiag(@Model.Id)" class="btn btn-danger ms-3">@Localizer["DiagnosticsDelete"]</a>
+                        </div>
+                    }
+                    <div class="modal fade" id="payment_" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="exampleModalLabel">@Localizer["PaymentAction"]</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    @await Html.PartialAsync("PartialViews/PaymentPartialView.cshtml", new PaymentViewModel() { DiagnosticId = Model.Id, Debt = Model.Debt, TypeOfCashlessPayment = Model.TypeOfCashlessPayment, TypesOfCashlessPayment = ViewBag.TypesOfCashlessPayment})
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                    @if (User.IsInRole("admin") || User.IsInRole("registrar") || User.IsInRole("manager"))
+                    {
+                        <a class="btn btn-outline-primary mt-3" asp-action="CreateEntry" asp-controller="Doctors" asp-route-diagnosticsId="@Model.Id">@Localizer["ButtonCreate"]</a>
+                        <a class="btn btn-outline-success mt-3 ms-3" asp-controller="Pdf" asp-action="DownloadCheck" asp-route-diagnosticsId="@Model.Id" asp-route-patientId="@Model.PatientId" asp-route-rsId="@ViewBag.ResearchMethodId">@Localizer["DownloadCheck"]</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>    
+@functions {
+    private List<string> StatusResult (string status)
+    {
+        List<string> result = new List<string>();
+        var textAndColor = "";
+        if (status == "Available")
+            textAndColor = $"{Localizer["Start"].Value} text-primary";
+        else if (status == "InProcess")
+            textAndColor = $"{Localizer["Finish"].Value} text-danger";
+        else
+            textAndColor = $"{Localizer["Reopen"].Value} text-success";
+        result.AddRange(textAndColor.Split(" "));
+        return result;
+    }
+}
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        function delDiag (id) {
+            console.log(id);
+            let deleteConfirm = confirm('@Localizer["ConfirmDelete"]');
+            if (deleteConfirm) {
+                window.location.href = '@Url.Action("DiagnosticsDelete", "Patients")?id=' + id;
+            }
+        };
+    </script>
+}

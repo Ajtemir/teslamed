@@ -1,0 +1,116 @@
+﻿@model TeslaMed.Models.DicomPathAndImagesPath;
+@using Microsoft.AspNetCore.Mvc.Localization
+
+@inject IViewLocalizer Localizer
+@{
+    ViewData["Title"] = Localizer["Title"];
+}
+<div>
+    <a class="btn btn-primary" asp-action="DiagnosticsDetails" asp-controller="Patients" asp-route-id="@ViewBag.DiagnosticsId">@Localizer["Back"]</a>
+</div>
+<div class="d-flex justify-content-center">
+    <div class="">
+        <h4 class="text-center">@Localizer["Header"]</h4>
+        <div class="col-auto">
+            <p>@Localizer["TotalImages"] @Model.ImagePaths.Count</p>
+            <p id="imgCountText">@Localizer["NumberOfTheCurrentImage"] 1</p>
+            @if (Model.ImagePaths.Count > 1)
+            {
+                <div class="ms-3 mb-3">
+                    <button class="btn btn-primary me-3" onclick="prevImg()">@Localizer["PreviousImage"]</button>
+                    <button class="btn btn-primary" onclick="nextImg()">@Localizer["NextImage"]</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<div class="d-flex justify-content-center"> 
+    <div>
+        @for (int i = 0; i < Model.ImagePaths.Count; i++)
+        {
+            if (i == 0)
+            {
+                <img src="@Model.ImagePaths[i]" id="img_@i" class="img-fluid" />
+            }
+            else
+            {
+                <img src="@Model.ImagePaths[i]" id="img_@i" class="img-fluid" style="display:none" />
+            }
+        }
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        let scrollableElement = document.body; 
+        scrollableElement.addEventListener('wheel', checkScrollDirection);
+        let imgCount = 0;
+        let maxImgCount = @Model.ImagePaths.Count;
+        function checkScrollDirection(event) {
+            if (maxImgCount > 1) {
+                if (checkScrollDirectionIsUp(event)) {
+                    //UP
+                    if (imgCount > 0) {
+                        imgCount -= 1;
+                        $('#img_' + imgCount).show();
+                        $('#img_' + (imgCount + 1)).hide();
+                        $('#imgCountText').text('@Localizer["NumberOfTheCurrentImage"]' + ' ' + (imgCount + 1));
+                    }
+                    else {
+                        imgCount = maxImgCount - 1;
+                        $('#img_' + imgCount).show();
+                        $('#img_' + 0).hide();
+                        $('#imgCountText').text('@Localizer["NumberOfTheCurrentImage"]' + ' ' + (imgCount + 1));
+                    }
+                } else {
+                    //Down
+                    if (imgCount < maxImgCount - 1) {
+                        imgCount += 1;
+                        $('#img_' + imgCount).show();
+                        $('#img_' + (imgCount - 1)).hide();
+                        $('#imgCountText').text('@Localizer["NumberOfTheCurrentImage"]' + ' ' + (imgCount + 1));
+                    }
+                    else {
+                        imgCount = 0;
+                        $('#img_' + imgCount).show();
+                        $('#img_' + (maxImgCount - 1)).hide();
+                        $('#imgCountText').text('@Localizer["NumberOfTheCurrentImage"]' + ' ' + (imgCount + 1));
+                    }
+                }
+            }
+        }
+        function checkScrollDirectionIsUp(event) {
+            if (event.wheelDelta) {
+                return event.wheelDelta > 0;
+            }
+            return event.deltaY < 0;
+        }
+
+        document.onkeydown = checkKey;
+        function checkKey(e) {
+            e = e || window.event;
+            if (e.keyCode == '39') {
+                // right arrow
+                event.wheelDelta = -1;
+                checkScrollDirection(event);
+            }
+            else if (e.keyCode == '37') {
+                // left arrow
+                event.wheelDelta = 1;
+                checkScrollDirection(event);
+            }
+        }
+
+        function prevImg() {
+            event.wheelDelta = 1;
+            checkScrollDirection(event);
+        }
+        function nextImg() {
+            event.wheelDelta = -1;
+            checkScrollDirection(event);
+        }
+    </script>
+}

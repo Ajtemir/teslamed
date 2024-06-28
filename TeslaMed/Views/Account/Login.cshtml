@@ -1,0 +1,55 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+
+@inject IViewLocalizer Localizer
+@model TeslaMed.ViewModels.LoginViewModel;
+
+@{
+    Layout = "_Layout2";
+    ViewData["Title"] = @Localizer["Title"];
+}
+
+<div class="text-center text-light" style="margin-top: 200px;">
+    <img src="~/images/Logo_TESLAMED2.png" alt="teslamedLogo" class="col-7 col-sm-6 col-md-5 col-lg-4 col-xl-3" />
+    <h4>@Localizer["Header"]</h4>
+    <h4>@Localizer["Title"]</h4>
+</div>
+<div class="d-flex justify-content-center mt-0">    
+    <div class="col-sm-6 col-md-5 col-lg-4 col-xl-3 ">
+        <form method="post" asp-controller="Account" asp-action="Login" class="mt-1">
+            
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="row">
+                <label asp-for="Login" class="col-4 pt-1 pe-0 text-light fs-5 fw-bold"></label>
+                <input asp-for="Login" class="col form-control me-3 rounded-pill" onkeyup="input('Login')" />
+            </div>
+
+            <div class="row pt-1">
+                <label asp-for="Password" class="col-4 pt-1 pe-0 text-light fs-5 fw-bold"></label>
+                <input asp-for="Password" class="col form-control me-3 rounded-pill" onkeyup="input('Password')" />
+            </div>
+
+            <div class="d-flex justify-content-center pt-2">
+                <input type="submit" value=@Localizer["ButtonLogin"] onclick="input('Login'), input('Password')" class="btn btn-light w-50 rounded-pill col-6 fs-5 fw-semibold pt-0" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        function input (x) {
+            if ($('#' + x).val().length < 1) {
+                $('#' + x).css('border', '1px solid red');
+                if (x === 'Login')
+                    $('#' + x).attr("placeholder", "@Localizer["NullErrorLogin"]");
+                if (x === 'Password')
+                    $('#' + x).attr("placeholder", "@Localizer["NullErrorPassword"]");
+            } else {
+                $('#' + x).css('border', '1px solid #ced4da');
+            }
+        }
+    </script>
+}

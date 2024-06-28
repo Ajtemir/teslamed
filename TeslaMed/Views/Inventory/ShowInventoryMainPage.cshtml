@@ -1,0 +1,21 @@
+@using Microsoft.AspNetCore.Mvc.Localization
+
+@inject IViewLocalizer Localizer
+@{
+    ViewData["Title"] = @Localizer["Title"];
+}
+
+<div class="container mt-5">
+    <h2 class="text-center">@Localizer["Title"]</h2>
+    <div>
+        <ul class="list-group list-group-flush pt-5">
+            <li class="list-group-item list-group-item-action"><a asp-action="CurrentAccount" asp-controller="Inventory" class="text-decoration-none text-dark fs-5 fw-semibold">@Localizer["CurrentAccount"]</a></li>
+            <li class="list-group-item list-group-item-action"><a asp-action="IndexSupply" asp-controller="Inventory" class="text-decoration-none text-dark fs-5 fw-semibold">@Localizer["Admission"]</a></li>
+            <li class="list-group-item list-group-item-action"><a asp-action="ShowAllRevisions" asp-controller="Inventory" class="text-decoration-none text-dark fs-5 fw-semibold">@Localizer["Revision"]</a></li>
+            @if (User.IsInRole("admin"))
+            {
+                <li class="list-group-item list-group-item-action"><a asp-action="Index" asp-controller="Inventory" class="text-decoration-none text-dark fs-5 fw-semibold">@Localizer["Title"]</a></li>
+            }
+        </ul>
+    </div>
+</div>

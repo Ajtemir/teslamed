@@ -1,0 +1,31 @@
+@using Microsoft.AspNetCore.Mvc.Localization
+
+@inject IViewLocalizer Localizer
+@{
+    ViewData["Title"] = @Localizer["Title"];
+}
+
+<div class="container mt-5">
+    <h2 class="text-center">@Localizer["Title"]</h2>
+    <div class="mb-5">
+        <p class="h4">@Localizer["CashReport"]</p>
+        <ul class="list-group list-group-flush ">
+            <li class="list-group-item list-group-item-action"><a asp-action="GeneralReport" asp-controller="Report" asp-route-firstDate="@DateTime.Now.ToString("MM.dd.yyyy")" asp-route-secondDate="@DateTime.Now.ToString("MM.dd.yyyy")" class="text-decoration-none text-dark fs-5 fw-semibold">@Localizer["GeneralReport"]</a></li>
+            <li class="list-group-item list-group-item-action"><a asp-action="DailyReport" asp-controller="Report" asp-route-firstDate="@DateTime.Now.ToString("MM.dd.yyyy")" asp-route-secondDate="@DateTime.Now.ToString("MM.dd.yyyy")" class="text-decoration-none text-dark fs-5 fw-semibold">@Localizer["DayReport"]</a></li>
+            <li class="list-group-item list-group-item-action"><a asp-action="NightlyReport" asp-controller="Report" asp-route-firstDate="@DateTime.Now.ToString("MM.dd.yyyy")" asp-route-secondDate="@DateTime.Now.ToString("MM.dd.yyyy")" class="text-decoration-none text-dark fs-5 fw-semibold">@Localizer["NightReport"]</a></li>
+            <li class="list-group-item list-group-item-action"><a asp-action="DetailedReport" asp-controller="Report" asp-route-firstDate="@DateTime.Now.ToString("MM.dd.yyyy")" asp-route-secondDate="@DateTime.Now.ToString("MM.dd.yyyy")" class="text-decoration-none text-dark fs-5 fw-semibold">@Localizer["DetailedReport"]</a></li>
+            <li class="list-group-item list-group-item-action"><a asp-action="DetailedDepartmentReport" asp-controller="Report" asp-route-firstDate="@DateTime.Now.ToString("MM.dd.yyyy")" asp-route-secondDate="@DateTime.Now.ToString("MM.dd.yyyy")" class="text-decoration-none text-dark fs-5 fw-semibold">@Localizer["DepartmentalReport"]</a></li>
+        </ul>
+    </div>
+     <div class="mb-5">
+        <p class="h4">@Localizer["DoctorReport"]</p>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item list-group-item-action"><a asp-action="DoctorReferralCountReport" asp-controller="Report" asp-route-firstDate="@DateTime.Now.ToString("MM.dd.yyyy")" asp-route-secondDate="@DateTime.Now.ToString("MM.dd.yyyy")" class="text-decoration-none text-dark fs-5 fw-semibold">@Localizer["FromReferringDoctor"]</a></li>
+            @*<li class="list-group-item list-group-item-action"><a asp-action="Index" asp-controller="Home" class="text-decoration-none text-dark fs-5 fw-semibold">@Localizer["FromServiceDoctor"]</a></li>*@
+            <li class="list-group-item list-group-item-action"><a asp-action="StaffDoctorsSummaryReport" asp-controller="Report" asp-route-firstDate="@DateTime.Now.ToString("MM.dd.yyyy")" asp-route-secondDate="@DateTime.Now.ToString("MM.dd.yyyy")" class="text-decoration-none text-dark fs-5 fw-semibold">@Localizer["FreeMedicalRecord"]</a></li>
+            <li class="list-group-item list-group-item-action"><a asp-action="DoctorReferralTotalReport" asp-controller="Report" asp-route-firstDate="@DateTime.Now.ToString("MM.dd.yyyy")" asp-route-secondDate="@DateTime.Now.ToString("MM.dd.yyyy")" class="text-decoration-none text-dark fs-5 fw-semibold">@Localizer["FromDoctorFinalReport"]</a></li>
+            @*<li class="list-group-item list-group-item-action"><a asp-action="Index" asp-controller="Home" class="text-decoration-none text-dark fs-5 fw-semibold">@Localizer["DynamicsReferrals"]</a></li>*@
+            <li class="list-group-item list-group-item-action"><a asp-action="ManagerReport" asp-controller="Report" asp-route-firstDate="@DateTime.Now.ToString("MM.dd.yyyy")" asp-route-secondDate="@DateTime.Now.ToString("MM.dd.yyyy")" class="text-decoration-none text-dark fs-5 fw-semibold">@Localizer["ManagersReport"]</a></li>
+        </ul>
+    </div> 
+</div>

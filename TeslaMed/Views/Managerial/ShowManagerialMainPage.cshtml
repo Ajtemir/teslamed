@@ -1,0 +1,16 @@
+@using Microsoft.AspNetCore.Mvc.Localization
+
+@inject IViewLocalizer Localizer
+@{
+    ViewData["Title"] = @Localizer["Title"];
+}
+
+<div class="container mt-5">
+    <h2 class="text-center">@Localizer["Title"]</h2>
+    <div class="mb-5">
+        <ul class="list-group list-group-flush ">
+            <li class="list-group-item list-group-item-action"><a asp-action="ShowPayDeskMainPage" asp-controller="Managerial" class="text-decoration-none text-dark fs-5 fw-semibold">@Localizer["PayDesk"]</a></li>
+            <li class="list-group-item list-group-item-action"><a asp-action="ShowStatisticsMainPage" asp-controller="Managerial" class="text-decoration-none text-dark fs-5 fw-semibold">@Localizer["Statistics"]</a></li>
+        </ul>
+    </div>
+</div>

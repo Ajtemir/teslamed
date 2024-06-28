@@ -1,0 +1,150 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+@model List<Diagnostics>
+
+@{
+    ViewData["Title"] = Localizer["Title"];
+    List<Doctor> doctors = ViewBag.Doctors;
+}
+
+<a asp-action="ShowReportMainPage" class="btn btn-primary">@Localizer["BackToMainPage"]</a>
+<div class="container mt-3 mb-3">
+    <form method="get" asp-action="@ViewContext.RouteData.Values["Action"]">
+        <div class="row ms-md-5">
+            <div class="col-lg">
+                <select name="manager" class="form-control">
+                    <option value="">@Localizer["AllManagers"]</option>
+                    @foreach (var manager in ViewBag.Managers)
+                    {
+                        <option value="@manager.Id">@manager.Surname @manager.Name.ToCharArray()[0]. @(manager.Patronymic != null ? manager.Patronymic.ToCharArray()[0] + "." : "")</option>
+                    }
+                </select>
+            </div>    
+            <div class="col-lg">
+                <select name="place" class="form-control">
+                    <option value="">@Localizer["AllPlaces"]</option>
+                    @foreach (var place in doctors.Select(d => d.PlaceOfWork).Distinct())
+                    {
+                        <option value="@place.Id">@place.Name</option>
+                    }
+                </select>
+            </div> 
+            <div class="col-lg">
+                <select name="doctor" class="form-control">
+                    <option value="">@Localizer["AllDoctors"]</option>
+                    @foreach (var doctor in doctors)
+                    {
+                        <option value="@doctor.Id">@doctor.Surname @doctor.Name.ToCharArray()[0]. @(doctor.Patronymic != null ? doctor.Patronymic.ToCharArray()[0] + "." : "")</option>
+                    }
+                </select>
+            </div> 
+            <div class="col-lg d-flex">
+                <label class="mt-1 me-1" for="firstDate">@Localizer["From"]:</label>
+                <input type="date" name="firstDate" class="form-control" />
+            </div>
+            <div class="col-lg d-flex">
+                <label class="mt-1 me-1" for="secondDate">@Localizer["To"]:</label>
+                <input type="date" name="secondDate" class="form-control" />
+            </div>              
+            <div class="col-lg-1 d-flex justify-content-lg-start justify-content-center" >
+                <button type="submit" class="p-0 border-0 bg-transparent" style="max-width: 38px" title="@Localizer["FilteringApplyReset"]">
+                    <img style="max-height: 38px" src="~/images/icons8-search.svg"/>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div>
+    @if (Model.Count == 0)
+    {
+        <p class="text-center">@Localizer["EmptyDiagnosticsList"]</p>
+    }
+    else
+    {
+        @foreach (var manager in ViewBag.Managers)
+        {
+            int doctorNumber = 0;
+            if (Model.Any(d => (d.ArrivalTypeDoctor != null ? d.ArrivalTypeDoctor.Manager : null) == manager))
+            {
+                <h5>@Localizer["Manager"]: @manager.Surname @manager.Name</h5>
+                <table class="table table-borderless text-center">
+                    <thead>
+                        <tr>
+                            <th>№</th>
+                            <th>@Localizer["Doctor"]</th>
+                            <th>@Localizer["Place"]</th>
+                            <th>@Localizer["TypesOfDiagnosticTotalCount"]</th>
+                            <th class="text-start">@Localizer["TypesOfDiagnostic"]</th>
+                            <th class="" style="width: 100px">@Localizer["TypeOfDiagnosticCount"]</th>
+                            <th colspan="@ViewBag.ResearchMethods.Count">@Localizer["ResearchMethodsCount"]</th>
+                        </tr>
+                        <tr>
+                            <th colspan="6"></th>
+                            @foreach (var method in ViewBag.ResearchMethods)
+                            {
+                                <th>@method.Name</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var doctor in doctors.Where(d => d.Manager == manager && Model.Any(a => a.ArrivalTypeDoctor == d)))
+                        {
+                            int totalTypesCount = 0;
+                            List<KeyValuePair<int, string>> typesAndCount = DoctorTypesResult(Model.Where(d => d.ArrivalTypeDoctor == doctor && d.ArrivalTypeDoctor.Manager == manager).ToList(), ViewBag.TypesOfDiagnostic, ref totalTypesCount);
+                            <tr>
+                                @{
+                                    doctorNumber++;
+                                    int typeNumber = 0;
+                                }
+                                <td>@doctorNumber</td>
+                                <td>@doctor.Surname @doctor.Name.ToCharArray()[0]. @(doctor.Patronymic != null ? doctor.Patronymic.ToCharArray()[0] + "." : "")</td>
+                                <td>@doctor.PlaceOfWork.Name</td>
+                                <td>@totalTypesCount</td>
+                                <td colspan="2" class="p-0">
+                                    <table class="table mb-1 table-borderless" style="margin-top: 7px;">
+                                        <tbody>
+                                        @foreach (KeyValuePair<int, string> type in typesAndCount)
+                                        {
+                                            typeNumber++;
+                                            <tr>
+                                                <td class="text-start py-0">@typeNumber. @type.Value</td>
+                                                <td class="py-0" style="width: 100px">@type.Key</td>
+                                            </tr>
+                                        }      
+                                        </tbody>
+                                    </table>
+                                </td>
+                                @foreach (var method in ViewBag.ResearchMethods)
+                                {
+                                    int methodsCount = 0;
+                                    @foreach (var type in typesAndCount.Where(t => t.Value.Contains(method.Name)))
+                                    {
+                                        methodsCount += type.Key;
+                                    }
+                                    <td>@methodsCount</td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        }        
+    }    
+</div>
+
+@functions{
+    private List<KeyValuePair<int, string>> DoctorTypesResult(List<Diagnostics> list, List<TypeOfDiagnostics> types, ref int totalTypesCount)
+    {
+        var typesAndCount = new List<KeyValuePair<int, string>>();
+        foreach (var type in types)
+            if (list.Any(d => d.TypesOfDiagnostics.Contains(type)))
+            {
+                int key = list.Where(d => d.TypesOfDiagnostics.Contains(type)).Count();
+                totalTypesCount += key;
+                typesAndCount.Add(new KeyValuePair<int, string>(key, $"{type.ResearchMethod.Name} {type.Name}"));
+            }
+        return typesAndCount;
+    }
+}

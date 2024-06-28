@@ -1,0 +1,526 @@
+﻿@using TeslaMed.Models;
+@using TeslaMed.ViewModels;
+@using Microsoft.AspNetCore.Mvc.Localization
+
+@inject IViewLocalizer Localizer
+@model TeslaMed.ViewModels.DiagnosticsCreateViewModel;
+
+@{
+    ViewData["Title"] = @Localizer["Header"];
+    ArrivalType arrivalType = new ArrivalType();
+}
+
+<div class="d-flex justify-content-center">
+    <div class="row ms-3">
+        <h3 class="text-center">@Localizer["Header"]</h3>
+        <div class="col-auto">
+            <h4 class="text-center">@Localizer["PatientsInfo"]</h4>
+            <table class="fs-6">
+                <tr>
+                    <td class="fw-bold pb-3">@Localizer["Code"]</td>
+                    <td class="ps-5 pb-3">@Model.Patient.Code</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold pb-3">@Localizer["Name"]</td>
+                    <td class="ps-5 pb-3">@Model.Patient.Name</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold pb-3">@Localizer["Surname"]</td>
+                    <td class="ps-5 pb-3">@Model.Patient.Surname</td>
+                </tr>
+                @if (Model.Patient.Patronymic != null)
+                {
+                    <tr>
+                        <td class="fw-bold pb-3">@Localizer["Patronymic"]</td>
+                        <td class="ps-5 pb-3">@Model.Patient.Patronymic</td>
+                    </tr>
+                }
+                <tr>
+                    <td class="fw-bold pb-3">@Localizer["Gender"]</td>
+                    <td class="ps-5 pb-3">@Model.Patient.Gender</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold pb-3">@Localizer["DateOfBirth"]</td>
+                    <td class="ps-5 pb-3">@Model.Patient.BirthDate.ToLongDateString()</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold pb-3">@Localizer["PhoneNumber"]</td>
+                    <td class="ps-5 pb-3">@Model.Patient.PhoneNumber</td>
+                </tr>
+                @if (Model.Patient.SecondPhoneNumber != null)
+                {
+                    <tr>
+                        <td class="fw-bold pb-3">@Localizer["SecondPhoneNumber"]</td>
+                        <td class="ps-5 pb-3">@Model.Patient.SecondPhoneNumber</td>
+                    </tr>
+                }
+                @if (Model.Patient.Comment != null)
+                {
+                    <tr>
+                        <td class="fw-bold pb-3">@Localizer["Comment"]</td>
+                        <td class="ps-5 pb-3">@Model.Patient.Comment</td>
+                    </tr>
+                }
+            </table>
+            
+            <form asp-action="DiagnosticsCreate" class="mt-3" id="diagCreate">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input asp-for="PatientId" value="@Model.Patient.Id" hidden class="form-control" />
+                <div class="form-group">
+                    <label asp-for="Anamnesis" class="control-label">@Localizer["Anamnesis"]</label>
+                    <textarea asp-for="Anamnesis" class="form-control" ></textarea>
+                    <span asp-validation-for="Anamnesis" class="text-danger"></span>
+                </div>
+                <div class="form-group mt-3">
+                    <label asp-for="ArrivalTypeId" class="control-label">@Localizer["ArrivalType"]</label>
+                    <select asp-for="ArrivalTypeId" class="form-select" onclick="docShow()">
+                        @if(Model.ArrivalTypes.Count == 0)
+                        {
+                            <option value="" hidden>@Localizer["NullListArrivalType"]</option>
+                        }
+                        else
+                        {
+                            <option value="" hidden>@Localizer["ChooseArrivalType"]</option>
+                            @foreach (var item in Model.ArrivalTypes)
+                            {
+                                <option value="@item.Id">@item.Name</option>
+                            }
+                        }
+                    </select>
+                    <span asp-validation-for="ArrivalTypeId" class="text-danger"></span>
+                </div>
+                <div class="form-group mt-3" id="docСhoice" style="display: none;">
+                    <label asp-for="ArrivalTypeId" class="control-label">@Localizer["FreelanceDoctor"]</label>
+                    <select asp-for="ArrivalTypeDoctorId" class="form-select" data-val="true" data-val-required="Укажите врача">
+                        @if (Model.ArrivalTypeDoctors.Count == 0)
+                        {
+                            <option value="" hidden>@Localizer["NullListFreelanceDoctors"]</option>
+                        }
+                        else
+                        {
+                            <option value="" hidden>@Localizer["ChooseFreelanceDoctor"]</option>
+                            @foreach (var item in Model.ArrivalTypeDoctors)
+                            {
+                                @if (item.Patronymic == null)
+                                {
+                                    <option value="@item.Id">@item.Surname @item.Name </option>
+                                }
+                                else
+                                {
+                                    <option value="@item.Id">@item.Surname @item.Name @item.Patronymic</option>
+                                }
+                            }
+                        }
+                    </select>
+                    <span asp-validation-for="ArrivalTypeDoctorId" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mt-3">
+                    <label asp-for="ResearchMethodId" class="control-label">@Localizer["ResearchMethod"]</label>
+                    <select asp-for="ResearchMethodId" onchange="diagnosticSelect()" class="form-select">
+                        @if (Model.ResearchMethods.Count == 0)
+                        {
+                            <option value="" hidden>@Localizer["NullListResearchMethods"]</option>
+                        }
+                        else
+                        {
+                            <option value="" hidden>@Localizer["ChooseResearchMethod"]</option>
+                            @foreach (var item in Model.ResearchMethods)
+                            {
+                                <option value="@item.Id" >@item.Name</option>
+                            }
+                        }
+                    </select>
+                    <span asp-validation-for="ResearchMethodId" class="text-danger"></span>
+                </div>
+
+                <div id="typeOfDiagnostic" class="form-group mt-3" style="display: none;">
+                    <label asp-for="TypesOfDiagnosticsId" class="control-label">@Localizer["TypeOfDiagnostics"]</label>
+                    <select asp-for="TypesOfDiagnosticsId[0]" class="form-select" onchange="getTotalSum()" data-val-required="@Localizer["ChooseTypeOfDiagnostics"]">   
+                    </select>
+                    <span class="text-danger field-validation-valid" data-valmsg-for="TypesOfDiagnosticsId[0]" data-valmsg-replace="true"></span>
+                </div>
+
+                @if (Model.TypesOfDiagnostics.Count > 0)
+                {
+                    <div class="form-group" id="diagnostics">
+                    </div>
+                    <div id="addDeleteBtns">
+                        <input type="button" value=@Localizer["AddDiagnostic"] class="btn btn-primary mt-3" onclick="newDiagnostics()" />
+                        <input type="button" value=@Localizer["DeleteDiagnostic"] class="btn btn-danger mt-3" onclick="deleteDiagnostics()" id="deleteBtn" style="display:none" />
+                    </div>
+                }
+                <div class="form-group mt-3">
+                    <label asp-for="DiscountId" class="control-label">@Localizer["Discount"]</label>
+                    <select asp-for="DiscountId" class="form-select" onchange="getTotalSum()">
+                        @if (Model.Discounts.Count == 0)
+                        {
+                            <option value="" hidden>@Localizer["NullListDiscount"]</option>
+                        }
+                        else
+                        {
+                            <option value="" hidden>@Localizer["ChooseDiscount"]</option>
+                            @foreach (var item in Model.Discounts)
+                            {
+                                <option value="@item.Id">@item.Name @Localizer["Percent"]@item.Percent</option>
+                            }
+                        }
+                    </select>
+                    <span asp-validation-for="DiscountId" class="text-danger"></span>
+                </div>
+                <div class="form-group mt-3">
+                    <label asp-for="DepartmentId" class="control-label">@Localizer["Department"]</label>
+                    <select asp-for="DepartmentId" onclick="docSelect()" class="form-select">
+                        @if (Model.Departments.Count == 0)
+                        {
+                            <option value="" hidden>@Localizer["NullListDepartment"]</option>
+                        }
+                        else
+                        {
+                            <option value="" hidden>@Localizer["ChooseDepartment"]</option>
+                            @foreach (var item in Model.Departments)
+                            {
+                                <option value="@item.Id">@item.Name</option>
+                            }
+                        }
+                    </select>
+                    <span asp-validation-for="DepartmentId" class="text-danger"></span>
+                </div>
+
+                <div id="docSelect" class="form-group mt-3" style="display: none;">
+                    <label asp-for="DoctorId" class="control-label">@Localizer["AddStaffDoctor"]</label>
+                    <select asp-for="DoctorId" class="form-select">                        
+                    </select>
+                    <span asp-validation-for="DoctorId" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mt-3" id="openPayFormBtn">
+                    <input type="button" value=@Localizer["ButtonPay"] class="btn btn-primary mt-3" onclick="showPayForm()" />
+                </div>
+                <div id="forPay" style="display: none;" class="form-group mt-3">
+                    <div class="form-group mt-3">
+                        <label asp-for="TotalCost" class="control-label">@Localizer["TotalSum"]</label>
+                        <input asp-for="TotalCost" id="TotalCost" class="form-control" readonly value=""/>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label asp-for="SumWithDiscount" class="control-label">@Localizer["TotalSumWithDiscount"]</label>
+                        <input asp-for="SumWithDiscount" id="SumWithDiscount" class="form-control" readonly value="@Model.SumWithDiscount" />
+                    </div>
+                    <div class="form-group mt-2">
+                        <label asp-for="BeenPaid" class="control-label">@Localizer["BeenPaid"]</label>
+                        <input asp-for="BeenPaid" id="BeenPaid" class="form-control" readonly value="0" />
+                    </div>
+                    <div class="form-group mt-2" id="cashDivPaid" style="display: none;">
+                        <label asp-for="CashPayment" class="control-label">@Localizer["PaidInCashLabel"]</label>
+                        <input asp-for="CashPayment" id="cashInputPaid" class="form-control" readonly value="0" />
+                    </div>
+                    <div class="form-group mt-2" id="cashlessDivPaid" style="display: none;">
+                        <label asp-for="CashlessPayment" class="control-label">@Localizer["PainByNonCashLabel"]</label>
+                        <input asp-for="CashlessPayment" id="cashlessInputPaid" class="form-control" readonly value="0" />
+                    </div>
+                    <div class="form-group mt-3">
+                        <label asp-for="Debt" class="control-label">@Localizer["Debt"]</label>
+                        <input asp-for="Debt" id="Debt" class="form-control" readonly value="@Model.Debt" />
+                    </div>
+                    <div class="form-group mt-3">
+                        <div id="PaymentForm">
+                            <div>
+                                <h5>@Localizer["CheckboxsHeader"]</h5>
+                                <div class="form-check form-check-inline mt-3">
+                                    <input class="form-check-input" type="checkbox" id="cashCheckbox" value="1" onclick="showCashInput()">
+                                    <label class="form-check-label">@Localizer["LabelOfCashCheckbox"]</label>
+                                </div>
+                                <div class="form-check form-check-inline mt-3">
+                                    <input class="form-check-input" type="checkbox" id="cashlessCheckbox" value="1" onclick="showCashlessInput()">
+                                    <label class="form-check-label">@Localizer["LabelOfCashlessCheckbox"]</label>
+                                </div>
+                            </div>
+                            <div class="mt-3" id="cashPayment" style="display: none;">
+                                <label class="control-label">@Localizer["CashAmountLabel"]</label>
+                                <input id="cashInput" type="number" class="form-control" placeholder="@Localizer["PaymentAmountPlaceholder"]" onkeyup="validator()" />
+                                <span class="text-danger valid" id="cashValid"></span>
+                            </div>
+                            <div class="mt-3" id="cashlessPayment" style="display: none;">
+                                <div>
+                                    <label asp-for="TypeOfCashlessPaymentId" class="control-label">@Localizer["TypesOfCashlessPaymentHeader"]</label>
+                                    <select asp-for="TypeOfCashlessPaymentId" class="form-select" id="cashlessType">
+                                        @if (Model.TypesOfCashlessPayment.Count == 0)
+                                        {
+                                            <option value="" hidden>@Localizer["NullListTypesOfCashlessPayment"]</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="" hidden>@Localizer["ChooseTypeOfCashlessPayment"]</option>
+                                            @foreach (var item in Model.TypesOfCashlessPayment)
+                                            {
+                                                <option value="@item.Id">@item.Name</option>
+                                            }
+                                        }
+                                    </select>
+                                    <span class="text-danger" id="cashlessTypeError"></span>
+                                </div>
+                                <label class="control-label mt-2">@Localizer["CashlessAmountLabel"]</label>
+                                <input id="cashlessInput" type="number" class="form-control" placeholder="@Localizer["PaymentAmountPlaceholder"]" onkeyup="validator()" />
+                                <span class="text-danger valid" id="cashlessValid"></span>
+                            </div>
+                            <div id="buttonPay" style="display: none;" class="mt-3">
+                                <input type="button" value=@Localizer["ButtonPay"] class="btn btn-primary mt-2" onclick="makePayment()" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group mt-3">
+                    <button type="submit" class="btn btn-primary mt-3">@Localizer["ButtonCreate"] </button>
+                </div>
+                <div>
+                    <a asp-action="Index" class="btn btn-primary mt-3">@Localizer["ButtonBack"]</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+
+        function makePayment(){
+            $('#diagCreate').valid(); 
+            let errors = $('.input-validation-error'); 
+            if (errors.length === 0) {
+                let typeResult = isCashlessTypeNull();
+                let result = validator();
+                console.log(typeResult);
+                if(result === true && typeResult === true){
+                    $('#cashlessTypeError').text('');
+                    $('select').css("pointer-events","none");
+                    $('select').css("background-color", "#e9ecef");
+                    $('textarea').attr("readonly", true);
+                    $('#addDeleteBtns').hide();
+                    pay();
+                }
+                if (typeResult === false) {
+                    $('#cashlessTypeError').text('@Localizer["TypesOfCashlessPaymentNullError"]');
+                }
+            }
+        };
+
+        function isCashlessTypeNull(){
+            let cashlessCheckboxVal = Number($('#cashlessCheckbox').val());
+            let cashlessTypeOptionVal = $("#cashlessType option:selected").val();
+            if(cashlessCheckboxVal === 0 && cashlessTypeOptionVal === ''){
+                return false;
+            }
+            else{
+                return true;
+            }
+        };
+
+        function validator() {
+            let selects = document.querySelectorAll(".form-select");
+            selects.forEach((item) => item.classList.remove("valid"));
+            selects.forEach((item) => item.classList.remove("input-validation-error"));
+            let cashAmount = Number($('#cashInput').val());
+            let cashlessAmount = Number($('#cashlessInput').val());
+            let sum = cashAmount + cashlessAmount;
+            let debt = Number($('#Debt').val());
+            if (cashAmount >= 0 && cashAmount <= @int.MaxValue && sum > 0 && sum <= debt && cashlessAmount >= 0 && cashlessAmount <= @int.MaxValue) {
+                $('.valid').text('');
+                return true;
+            }
+            else if (cashAmount > debt && cashAmount <= @int.MaxValue) {
+                $('#cashValid').text('@Localizer["SumError1"]');
+            } 
+            else if (cashlessAmount > debt && cashlessAmount <= @int.MaxValue) {
+                $('#cashlessValid').text('@Localizer["SumError1"]');
+            } 
+            else if (sum > debt && sum <= @int.MaxValue) {
+                $('.valid').text('@Localizer["TotalAmountError"]');
+            }
+            else if (cashAmount < 0 || cashAmount > @int.MaxValue) {
+                $('#cashValid').text('@Localizer["SumError2"]');
+            }
+            else if (cashlessAmount < 0 || cashlessAmount > @int.MaxValue) {
+                $('#cashlessValid').text('@Localizer["SumError2"]');
+            }
+            else if (sum === 0) {
+                $('.valid').text('@Localizer["NullException"]');
+            }
+            
+        };
+
+        function showCashInput(){
+            let checkboxValue = $('#cashCheckbox').val();
+            if(checkboxValue == 1){
+                $('#cashPayment').show();
+                $('#buttonPay').show();
+                const inputCashCheckbox = document.querySelector('#cashCheckbox');
+                inputCashCheckbox.value = 0;
+            }
+            if (checkboxValue == 0) {
+                $('#cashPayment').hide();
+                const inputCashCheckbox = document.querySelector('#cashCheckbox');
+                inputCashCheckbox.value = 1;
+                const cashInput = document.querySelector('#cashInput');
+                cashInput.value = 0;
+            }
+        };
+
+        function showCashlessInput(){
+            let checkboxValue = $('#cashlessCheckbox').val();
+            if(checkboxValue == 1){
+                $('#cashlessPayment').show();
+                $('#buttonPay').show();
+                const inputCashCheckbox = document.querySelector('#cashlessCheckbox');
+                inputCashCheckbox.value = 0;
+            }
+            if (checkboxValue == 0) {
+                $('#cashlessPayment').hide();
+                const inputCashCheckbox = document.querySelector('#cashlessCheckbox');
+                inputCashCheckbox.value = 1;
+                const cashlessInput = document.querySelector('#cashlessInput');
+                cashlessInput.value = 0;
+            }
+        };
+
+        function showPayForm(){
+            $('#diagCreate').valid(); 
+            let errors = $('.input-validation-error'); 
+            if (errors.length === 0) {
+                $('#forPay').show();
+                $('#openPayFormBtn').hide();
+                getTotalSum();
+            }
+        };
+
+        let sum = 0;
+        let sumWithDiscount = 0;
+
+        function getTotalSum(){
+            let arrTypesId = [];
+            let arrPrice = [];
+            let arrSelectedTypesId = [];
+            @foreach (var item in Model.TypesOfDiagnostics)
+            {
+                @:arrTypesId.push("@item.Id");
+                @:arrPrice.push("@item.Price");
+            }    
+            let container = document.getElementById("diagnostics");
+            let selectCount = container.getElementsByTagName("select").length;
+            ++selectCount;
+            for(let i = 0; i < selectCount; i++){
+                let getId = $('#TypesOfDiagnosticsId_' + i +'_ option:selected').val();
+                arrSelectedTypesId.push(getId);
+            }
+            
+            for(let i = 0; i < arrSelectedTypesId.length; i++){
+                for(let j = 0; j < arrTypesId.length; j++){
+                    if(arrTypesId[j] === arrSelectedTypesId[i]){
+                        sum += Number(arrPrice[j]);
+                    }
+                }
+            }
+            const inputTotalCost = document.querySelector('#TotalCost');
+            inputTotalCost.value = sum;
+            getSumWithDiscount();
+        }
+
+        function getSumWithDiscount(){
+            let arrDiscountsId = [];
+            let arrPercent = [];
+            let arrSelectedDiscountId = 0;
+            let percent = 0;
+            @foreach (var item in Model.Discounts)
+            {
+                @:arrDiscountsId.push("@item.Id");
+                @:arrPercent.push("@item.Percent");
+            }
+            arrSelectedDiscountId = $('#DiscountId option:selected').val();
+            for(let i = 0; i < arrDiscountsId.length; i++){
+                if(arrSelectedDiscountId === arrDiscountsId[i]){
+                    percent = arrPercent[i];
+                }
+            }
+            const inputSumWithDiscount = document.querySelector('#SumWithDiscount');
+            const inputDebt = document.querySelector('#Debt');
+            if(percent > 0){
+                sumWithDiscount = sum - (sum * percent / 100);
+                sumWithDiscount = Math.round(sumWithDiscount);
+                console.log(sumWithDiscount);
+                inputSumWithDiscount.value = sumWithDiscount;
+                inputDebt.value = sumWithDiscount;
+            }
+            else{
+                sumWithDiscount = sum;
+                inputSumWithDiscount.value = sum;
+                inputDebt.value = sum;
+            }
+            sum = 0;
+        }
+        function pay(){
+            $('#PaymentForm').hide();
+            let paymentAmount = 0;
+            let cashPayment = $('#cashInput').val();
+            let cashlessPayment = $('#cashlessInput').val();
+            if(cashPayment != null){
+                $('#cashDivPaid').show();
+                const cashInputPaid = document.querySelector('#cashInputPaid');
+                cashInputPaid.value = cashPayment;
+                paymentAmount += Number(cashPayment);
+            }
+            if (cashlessPayment != null) {
+                $('#cashlessDivPaid').show();
+                const cashlessInputPaid = document.querySelector('#cashlessInputPaid');
+                cashlessInputPaid.value = cashlessPayment;
+                paymentAmount += Number(cashlessPayment);
+            }
+            const inputBeenPaid = document.querySelector('#BeenPaid');
+            inputBeenPaid.value = paymentAmount;
+            const inputDebt = document.querySelector('#Debt');
+            inputDebt.value = sumWithDiscount - paymentAmount;
+        }
+
+        function docShow() {
+            if ($('#ArrivalTypeId option:selected').text() === '@Localizer["Doctor"]') 
+                $('#docСhoice').show();       
+            else
+                $('#docСhoice').hide();
+        }
+      
+        function deleteDiagnostics() {
+            let container = document.getElementById("diagnostics");
+            let selectCount = container.getElementsByTagName("select").length;
+            document.getElementById("diagnostics_" + selectCount).remove();
+            if (selectCount === 1){
+                $('#deleteBtn').css('display', 'none');
+            }
+            getTotalSum();
+        }        
+
+        function docSelect () {
+            if ($('#DepartmentId option:selected').val() != '') {
+               let x = $('#DepartmentId option:selected').val();
+                $('#DoctorId').load('@Url.Action("DoctorsList","Patients")?id=' + x)
+                $('#docSelect').show();
+            }
+        };
+
+        function diagnosticSelect () {
+            if ($('#ResearchMethodId option:selected').val() != '') {
+               let x = $('#ResearchMethodId option:selected').val();
+                $('#TypesOfDiagnosticsId_0_').load('@Url.Action("TypesOfDiagnosticList","Patients")?id=' + x)
+                $('#typeOfDiagnostic').show();
+                $('#addBtn').show();
+                $('#diagnostics').text("");
+                $('#TypesOfDiagnosticsId_0_').val('');
+                $('#deleteBtn').hide();
+                getTotalSum();
+            }
+        };
+
+
+    </script>
+}

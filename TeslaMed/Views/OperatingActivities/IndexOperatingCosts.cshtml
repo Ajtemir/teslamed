@@ -1,0 +1,90 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+
+@inject IViewLocalizer Localizer
+@model List<OperatingCost>
+
+@{
+    ViewData["Title"] = @Localizer["Header"];
+}
+<div class="container">
+    <a class="btn btn-primary" asp-action="ShowOperatingActivitiesMainPage" >@Localizer["ButtonBack"]</a>
+    <h2 class="text-center text-primary">@Localizer["Header"]</h2>
+    <form id="filterForm" method="post" style="display: none;">
+        <div class="row mt-4 mb-4">
+            <div class="col-md-3">
+                <label for="dateFilter">@Localizer["FilterDate"]</label>
+                <input type="date" id="dateFilter" name="dateFilter" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <label for="nameFilter">@Localizer["FilterName"]</label>
+                <input type="text" id="nameFilter" name="nameFilter" class="form-control" />
+            </div>
+            <div class="col-md-3 mt-4">
+                <button type="submit" class="btn btn-primary">@Localizer["Apply"]</button>
+                <a onclick="closeFilterForm()" title="@Localizer["ButtonClose"]">
+                    <img src="~/images/icons8-close.svg" class="w-100" style="max-width: 30px" />
+                </a>
+            </div>
+        </div>
+    </form>
+    <div class="d-flex justify-content-between">
+        <a asp-controller="OperatingActivities" asp-action="CreateOperatingCosts" asp-route-isManagersCost="false" title="@Localizer["ButtonCreate"]">
+            <i class="bi bi-plus-circle fs-2"></i>
+        </a>
+        @if (ViewBag.Filtering != null)
+        {
+            <a asp-action="IndexOperatingCosts" class="btn btn-primary h-75 mt-1">@Localizer["FilteringReset"]</a>
+        }
+        <a class="btn" onclick="openFilterForm()" title="@Localizer["BtnFiltering"]">
+            <img src="~/images/icons8-search.svg" class="w-100" style="max-width: 30px" />
+        </a>
+    </div>
+
+    @if (Model.Count == 0)
+    {
+        <p class="text-center">@Localizer["NullList"]</p>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>№</th>
+                    <th>@Localizer["Date"]</th>
+                    <th>@Localizer["Name"]</th>
+                    <th>@Localizer["Type"]</th>
+                    <th>@Localizer["Unit"]</th>
+                    <th>@Localizer["TotalAmount"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.Count(); i++)
+                {
+                    <tr>
+                        <td>@(i + 1)</td>
+                        <td>@Model[i].DateOfCreation.ToString("d")</td>
+                        <td>@Model[i].OperatingCostName.Name</td>
+                        <td>@Model[i].TypeOfCosts.Name</td>
+                        <td>@Model[i].OperatingCostName.Unit</td>
+                        <td>@Model[i].TotalAmount</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@section Scripts{
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        function openFilterForm() {
+            $('#filterForm').show();
+        };
+        function closeFilterForm() {
+            $('#filterForm').hide();
+        };
+    </script>
+
+}

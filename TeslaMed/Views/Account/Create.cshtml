@@ -1,0 +1,277 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+
+@inject IViewLocalizer Localizer
+@model TeslaMed.ViewModels.CreateUserViewModel
+@{
+    ViewData["Title"] = @Localizer["Header"];
+}
+
+<h2 class="text-center">@Localizer["Header"]</h2>
+<div class="container">
+    <form method="post" asp-controller="Account" asp-action="Create" enctype="multipart/form-data">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="mb-3 mt-3">
+            <label asp-for="UserName" class="control-label">Логин</label>
+            <span asp-validation-for="UserName" class="text-danger"></span>
+            <input asp-for="UserName" class="form-control" placeholder=@Localizer["UserNamePlaceholder"]>
+        </div>
+        <div class="mb-3 mt-3">
+            <label asp-for="Name" class="control-label">Имя</label>
+            <span asp-validation-for="Name" class="text-danger"></span>
+            <input asp-for="Name" class="form-control" placeholder=@Localizer["NamePlaceholder"]>
+        </div>
+        <div class="mb-3 mt-3">
+            <label asp-for="Surname" class="control-label">Фамилия</label>
+            <span asp-validation-for="Surname" class="text-danger"></span>
+            <input asp-for="Surname" class="form-control" placeholder=@Localizer["SurnamePlaceholder"]>
+        </div>
+        <div class="mb-3 mt-3">
+            <label asp-for="Patronymic" class="control-label">Отчество</label>
+            <input asp-for="Patronymic" class="form-control" placeholder=@Localizer["PatronymicPlaceholder"]>
+        </div>
+        <div class="mb-3 mt-3">
+            <label asp-for="Address" class="control-label">Адрес</label>
+            <span asp-validation-for="Address" class="text-danger"></span>
+            <input asp-for="Address" class="form-control" placeholder=@Localizer["AddressPlaceholder"]>
+        </div>
+        <div class="mb-3 mt-3">
+            <label asp-for="PhoneNumber" class="control-label">Номер телефона</label>
+            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+            <input asp-for="PhoneNumber" class="form-control" placeholder="Номер телефона сотрудника">
+        </div>
+        <div class="mb-3 mt-3">
+            <label asp-for="Role" class="control-label">Роль</label>
+            <span asp-validation-for="Role" class="text-danger"></span>
+            <select asp-for="Role" class="form-select" onclick="specShow()">
+                <option value="" hidden>Выберите роль</option>
+                <option value="doctor">Врач</option>
+                <option value="manager">Менеджер</option>
+                <option value="x-ray_laboratory_assistant">Рентген-лаборант</option>
+                <option value="registrar">Регистратор</option>
+            </select>
+        </div>
+
+        @if (Model._Departments.Count == 0)
+        {
+            <div>
+                <p class="text-danger">Нет отделов, без них нельзя создать пользователя</p>
+            </div>
+        }
+        else
+        {
+            <div class="mb-3 mt-3">
+                <label asp-for="Departments[0]" class="control-label">Отдел</label>
+                <span asp-validation-for="Departments[0]" class="text-danger"></span>
+                <select asp-for="Departments[0]" class="form-control" required data-val-required="Укажите отдел">
+                    <option value="" hidden>Выберите отдел</option>
+                    @foreach (var item in Model._Departments)
+                    {
+                        <option value="@item.Id">@item.Name</option>
+                    }
+                </select>
+            </div>
+        }
+
+        <div class="" id="departments">
+        </div>
+        <div>
+            <input type="button" value="Добавить отделение" class="btn btn-primary mt-3" onclick="newDepartments()" />
+            <input type="button" value="Удалить отделение" class="btn btn-danger mt-3" onclick="deleteDepartments()" id="deleteBtnDepartments" style="display:none" />
+        </div>
+
+        @if (Model._Specializations.Count == 0)
+        {
+            <div>
+                <p class="text-danger">Нет специализации, без них нельзя создать пользователя</p>
+            </div>
+        }
+        else
+        {
+            <div id="insertSpecialization">
+                <div class="mb-3 mt-3" id="regСhoice" style="display: none;">
+                    <label asp-for="Specializations[0]" class="control-label">Специализация</label>
+                    <span asp-validation-for="Specializations[0]" class="text-danger"></span>
+                    <select asp-for="Specializations[0]" class="form-control">
+                        <option value="" hidden>Выберите специализацию</option>
+                        @foreach (var item in Model._Specializations)
+                        {
+                            <option value="@item.Id">@item.Name</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        }
+        <div  id="specializations">
+        </div>
+        <div id="specializationsButtons" style="display: none">
+            <input type="button" value="Добавить специализацию" class="btn btn-primary mt-3" onclick="newSpecializations()" />
+            <input type="button" value="Удалить специализацию" class="btn btn-danger mt-3" onclick="deleteSpecializations()" id="deleteBtnSpecializations" style="display:none" />
+        </div>
+       
+        <div class="mb-3 mt-3">
+            <label asp-for="Post" class="control-label">Должность</label>
+            <span asp-validation-for="Post" class="text-danger"></span>
+            <select asp-for="Post" class="form-control" required>
+                @if (Model._Posts.Count == 0)
+                {
+                    <option value="" hidden>Нет должностей</option>
+                }
+                else
+                {
+                    <option value="" hidden>Выберите должность</option>
+                    @foreach (var item in Model._Posts)
+                    {
+                        <option value="@item.Id">@item.Title</option>
+                    }
+                }
+            </select>
+        </div>
+        
+        <div class="mb-3 mt-3">
+            <label asp-for="Password" class="control-label">Пароль</label>
+            <span asp-validation-for="Password" class="text-danger"></span>
+            <input asp-for="Password" class="form-control" placeholder=@Localizer["PasswordPlaceholder"]>
+        </div>
+        <div class="mb-3 mt-3">
+            <label asp-for="PasswordConfirm" class="control-label">Подтвердите пароль</label>
+            <span asp-validation-for="PasswordConfirm" class="text-danger"></span>
+            <input asp-for="PasswordConfirm" class="form-control" placeholder=@Localizer["ConfirmPlaceholder"]>
+        </div>
+        <div class="mb-3 mt-3">
+            <input asp-for="Active" type="hidden" value="true">
+        </div>
+        <div class="text-center mb-3">
+            <input class="btn btn-success" type="submit" value="@Localizer["ButtonCreate"]" />
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        if (document.readyState) {
+            if (($('#Role option:selected').text() === 'Регистратор') || ($('#Role option:selected').text() === 'Выберите роль')) {
+                $('#regСhoice').remove();
+                $('#specializations').remove();
+                $('#specializationsButtons').hide();
+            }
+            else{
+                $('#specializations').show();
+                $('#regСhoice').show();
+                $('#specializationsButtons').show();
+            }
+
+        }
+        function specShow() {
+            let html = '<div class="mb-3 mt-3" id="regСhoice">';
+            html += '<label asp-for="Specializations[0]" class="control-label">Специализация</label>';
+            html += '<span asp-validation-for="Specializations[0]" class="text-danger"></span>';
+            html += '<select asp-for="Specializations[0]" name="Specializations[0]" class="form-control">';
+            html += '<option value="" hidden>Выберите специализацию</option>';
+            let arrOptionsId = [];
+            let arrOptionsName = [];
+            @foreach (var item in Model._Specializations)
+            {
+                @:arrOptionsId.push("@item.Id");
+                @:arrOptionsName.push("@item.Name");
+            }
+            for(let i = 0; i < arrOptionsId.length; i++) {
+                html += '<option value="' + arrOptionsId[i] + '">' + arrOptionsName[i] + '</option>';
+            }
+            html += '</select>';
+            html += '</div>';
+            
+            
+            if (($('#Role option:selected').text() === 'Регистратор') || ($('#Role option:selected').text() === 'Выберите роль')) {
+                $('#regСhoice').remove();
+                $('#specializations').remove();
+                $('#specializationsButtons').hide();
+            }
+            else{
+                $('#regСhoice').show();
+                let div = document.createElement("div");
+                div.setAttribute("id", "specializations");
+                if (document.getElementById("specializations") === null){
+                    document.getElementById("insertSpecialization").insertAdjacentElement('afterEnd', div);
+                };
+                document.getElementById("insertSpecialization").innerHTML = html;
+                $('#specializationsButtons').show();
+                $('#deleteBtnSpecializations').css('display', 'none');
+            }
+        }
+        function deleteDepartments() {
+            let container = document.getElementById("departments");
+            let selectCount = container.getElementsByTagName("select").length;
+            document.getElementById("departments_" + selectCount).remove();
+            if (selectCount === 1) {
+                $('#deleteBtnDepartments').css('display', 'none');
+            }
+        }
+        function newDepartments() {
+            let container = document.getElementById("departments");
+            let selectCount = container.getElementsByTagName("select").length;
+            let nextSelectId = selectCount + 1;
+            let arrOptionsId = [];
+            let arrOptionsName = [];
+        @foreach (var item in Model._Departments)
+        {
+            @:arrOptionsId.push("@item.Id");
+            @:arrOptionsName.push("@item.Name");
+        }
+                let html = '<label asp-for="Departments[' + nextSelectId + ']" class="control-label">Отдел</label>';
+            html += '<select asp-for="Departments[' + nextSelectId + ']" class="form-select mt-3" name="Departments[' + nextSelectId + ']" data-val="true" data-val-required="The Int32 field is required." id="Departments_' + nextSelectId + '_" required >';
+            html += '<option value="" hidden>Выберите отдел</option>';
+            for (let i = 0; i < arrOptionsId.length; i++) {
+                html += '<option value="' + arrOptionsId[i] + '">' + arrOptionsName[i] + '</option>';
+            }
+            html += '</select>';
+            let div = document.createElement("div");
+            div.setAttribute("id", "departments_" + nextSelectId);
+            document.getElementById("departments").appendChild(div);
+            document.getElementById("departments_" + nextSelectId).innerHTML = html;
+            if (nextSelectId > 0) {
+                $('#deleteBtnDepartments').css('display', 'block');
+            }
+        }
+
+
+
+        function deleteSpecializations() {
+            let container = document.getElementById("specializations");
+            let selectCount = container.getElementsByTagName("select").length;
+            document.getElementById("specializations_" + selectCount).remove();
+            if (selectCount === 1) {
+                $('#deleteBtnSpecializations').css('display', 'none');
+            }
+        }
+        function newSpecializations() {
+            let container = document.getElementById("specializations");
+            let selectCount = container.getElementsByTagName("select").length;
+            let nextSelectId = selectCount + 1;
+            let arrOptionsId = [];
+            let arrOptionsName = [];
+        @foreach (var item in Model._Specializations)
+        {
+            @:arrOptionsId.push("@item.Id");
+            @:arrOptionsName.push("@item.Name");
+        }
+                let html = '<label asp-for="Specializations[' + nextSelectId + ']" class="control-label">Специализация</label>';
+            html += '<select asp-for="Specializations[' + nextSelectId + ']" class="form-select mt-3" name="Specializations[' + nextSelectId + ']" data-val="true" data-val-required="The Int32 field is required." id="Specializations_' + nextSelectId + '_" required >';
+            html += '<option value="" hidden>Выберите специализацию</option>';
+            for (let i = 0; i < arrOptionsId.length; i++) {
+                html += '<option value="' + arrOptionsId[i] + '">' + arrOptionsName[i] + '</option>';
+            }
+            html += '</select>';
+            let div = document.createElement("div");
+            div.setAttribute("id", "specializations_" + nextSelectId);
+            document.getElementById("specializations").appendChild(div);
+            document.getElementById("specializations_" + nextSelectId).innerHTML = html;
+            if (nextSelectId > 0) {
+                $('#deleteBtnSpecializations').css('display', 'block');
+            }
+        }
+
+    </script>
+}

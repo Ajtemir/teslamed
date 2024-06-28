@@ -1,0 +1,25 @@
+﻿@using TeslaMed.ViewModels
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@model ReportViewModel
+<div>
+    <div>
+        <form asp-controller="Patients" asp-action="Conclude" id="formConclusion_@Model.TypeOfDiagnosticId">
+            <div>
+                <input asp-for="DiagnosticId" value="@Model.DiagnosticId" hidden />
+                <input asp-for="TypeOfDiagnosticId" value="@Model.TypeOfDiagnosticId" hidden />
+            </div>
+            <label class="control-label">@Localizer["ConclutionLabel"]</label>
+            @if (Model.Conclusion != null)
+            {
+                <textarea asp-for="Conclusion" class="form-control">@Model.Conclusion</textarea>
+            }
+            else
+            {
+                <textarea asp-for="Conclusion" class="form-control" placeholder="@Localizer["ConclutionPlaceholder"]"></textarea>
+
+            }
+            <button type="submit" class="btn btn-primary mt-2">@Localizer["ConclutionButton"]</button>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,26 @@
+﻿.vs/
+TeslaMed/.vs
+TeslaMed/.vs/TeslaMed
+# Build results
+
+
+[Dd]ebug/
+
+[Bb]in/
+
+[Oo]bj/
+
+[Ww]wwroot/images/*
+
+![Ww]wwroot/images/.gitkeep
+
+#
+
+*.db
+
+*.db-shm
+
+*.db-wal
+#/TeslaMed/Migrations
+#/TeslaMed/Migrations/20230925045833_initiation.cs
+#/TeslaMed/Migrations/20230925045833_initiation.Designer.cs

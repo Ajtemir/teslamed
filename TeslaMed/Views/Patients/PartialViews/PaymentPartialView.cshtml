@@ -1,0 +1,145 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@model TeslaMed.ViewModels.PaymentViewModel
+
+<form id="formPayment_@Model.DiagnosticId" asp-controller="Patients" asp-action="Payment">
+    <input asp-for="DiagnosticId" value="@Model.DiagnosticId" hidden/>
+    <input asp-for="Url" value="@Context.Request.Path?id=@Model.DiagnosticId" hidden />
+    <input asp-for="Debt" value="@Model.Debt" class="debt_@Model.DiagnosticId" hidden/>
+    <div>
+        <h5>@Localizer["CheckboxsHeader"]</h5>
+        <div class="form-check form-check-inline mt-3">
+            <input class="form-check-input" type="checkbox" id="cashCheckbox_@Model.DiagnosticId" value="1" onclick="showCashInput(@Model.DiagnosticId)">
+            <label class="form-check-label">@Localizer["LabelOfCashCheckbox"]</label>
+        </div>
+        <div class="form-check form-check-inline mt-3">
+            <input class="form-check-input" type="checkbox" id="cashlessCheckbox_@Model.DiagnosticId" value="1" onclick="showCashlessInput(@Model.DiagnosticId)">
+            <label class="form-check-label">@Localizer["LabelOfCashlessCheckbox"]</label>
+        </div>
+    </div>
+    <div style="display: none;" id="cashPayment_@Model.DiagnosticId">
+        <label asp-for="CashAmount" class="form-label"></label>
+        <input asp-for="CashAmount" value="0" type="number" id="cashInput_@Model.DiagnosticId" class="form-control" onkeyup="validator(@Model.DiagnosticId)" />
+        <span class="text-danger valid_@Model.DiagnosticId" id="cashValid_@Model.DiagnosticId"></span>
+    </div>
+    <div style="display: none;" id="cashlessPayment_@Model.DiagnosticId">
+        <div>
+            @if (Model.TypeOfCashlessPayment != null)
+            {
+                <label class="form-label">@Localizer["TypesOfCashlessPaymentHeader"]</label>
+                <input class="form-control" readonly value="@Model.TypeOfCashlessPayment.Name" />
+            }
+            else
+            {
+                <label asp-for="TypeOfCashlessPaymentId" class="control-label">@Localizer["TypesOfCashlessPaymentHeader"]</label>
+                <select asp-for="TypeOfCashlessPaymentId" class="form-select" id="cashlessType">
+                    @if (Model.TypesOfCashlessPayment.Count == 0)
+                    {
+                        <option value="" hidden>@Localizer["NullListTypesOfCashlessPayment"]</option>
+                    }
+                    else
+                    {
+                        <option value="" hidden>@Localizer["ChooseTypeOfCashlessPayment"]</option>
+                        @foreach (var item in Model.TypesOfCashlessPayment)
+                        {
+                            <option value="@item.Id">@item.Name</option>
+                        }
+                    }
+                </select>
+                <span class="text-danger" id="cashlessTypeError"></span>
+            }
+        </div>
+        <div>
+            <label asp-for="CashlessAmount" class="form-label"></label>
+            <input asp-for="CashlessAmount" value="0" type="number" id="cashlessInput_@Model.DiagnosticId" class="form-control" onkeyup="validator(@Model.DiagnosticId)" />
+            <span class="text-danger valid_@Model.DiagnosticId" id="cashlessValid_@Model.DiagnosticId"></span>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Localizer["Close"]</button>
+        <button type="button" onclick="formSubmit(@Model.DiagnosticId)" class="btn btn-primary">@Localizer["MakePayment"]</button>
+    </div>
+</form>
+
+<script>
+    function showCashInput(x) {
+        let checkboxValue = $('#cashCheckbox_' + x).val();
+        if (checkboxValue == 1) {
+            $('#cashPayment_' + x).show();
+            const inputCashCheckbox = document.querySelector('#cashCheckbox_' + x);
+            inputCashCheckbox.value = 0;
+        }
+        if (checkboxValue == 0) {
+            $('#cashPayment_' + x).hide();
+            const inputCashCheckbox = document.querySelector('#cashCheckbox_' + x);
+            inputCashCheckbox.value = 1;
+            const cashInput = document.querySelector('#cashInput_' + x);
+            cashInput.value = 0;
+        }
+    };
+
+    function showCashlessInput(x) {
+        let checkboxValue = $('#cashlessCheckbox_' + x).val();
+        if (checkboxValue == 1) {
+            $('#cashlessPayment_' + x).show();
+            const inputCashCheckbox = document.querySelector('#cashlessCheckbox_' + x);
+            inputCashCheckbox.value = 0;
+        }
+        if (checkboxValue == 0) {
+            $('#cashlessPayment_' + x).hide();
+            const inputCashCheckbox = document.querySelector('#cashlessCheckbox_' + x);
+            inputCashCheckbox.value = 1;
+            const cashlessInput = document.querySelector('#cashlessInput_' + x);
+            cashlessInput.value = 0;
+        }
+    };
+
+    function formSubmit (x) {
+        let result = validator(x);
+        let typeResult = isCashlessTypeNull(x);
+        if (result === true && typeResult === true)
+            $('#formPayment_' + x).submit();
+    };
+
+    function isCashlessTypeNull(x) {
+        let cashlessCheckboxVal = Number($('#cashlessCheckbox_' + x).val());
+        let cashlessTypeOptionVal = $("#cashlessType option:selected").val();
+        if (cashlessCheckboxVal === 0 && cashlessTypeOptionVal === '') {
+            $('#cashlessTypeError').text('@Localizer["TypesOfCashlessPaymentNullError"]');
+            return false;
+        }
+        else {
+            $('#cashlessTypeError').text('');
+            return true;
+        }
+    };
+
+    function validator (x) {
+        let cashAmount = Number($('#cashInput_' + x).val());
+        let cashlessAmount = Number($('#cashlessInput_' + x).val());
+        let sum = cashAmount + cashlessAmount;
+        let debt = Number($('.debt_' + x).val());
+        if (cashAmount >= 0 && cashAmount <= @int.MaxValue && sum > 0 && sum <= debt && cashlessAmount >= 0 && cashlessAmount <= @int.MaxValue) {
+            $('.valid_' + x).text('');
+            return true;
+        }
+        else if (cashAmount > debt && cashAmount <= @int.MaxValue) {
+            $('#cashValid_' + x).text('@Localizer["SumError1"]');
+        } 
+        else if (cashlessAmount > debt && cashlessAmount <= @int.MaxValue) {
+            $('#cashlessValid_' + x).text('@Localizer["SumError1"]');
+        } 
+        else if (sum > debt && sum <= @int.MaxValue) {
+            $('.valid_' + x).text('@Localizer["TotalAmountError"]');
+        }
+        else if (cashAmount < 0 || cashAmount > @int.MaxValue) {
+            $('#cashValid_' + x).text('@Localizer["SumError2"]');
+        }
+        else if (cashlessAmount < 0 || cashlessAmount > @int.MaxValue) {
+            $('#cashlessValid_' + x).text('@Localizer["SumError2"]');
+        }
+        else if (sum === 0) {
+            $('.valid_' + x).text('@Localizer["NullException"]');
+        }
+    };
+</script>

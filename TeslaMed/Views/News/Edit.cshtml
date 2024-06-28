@@ -1,0 +1,183 @@
+﻿@model TeslaMed.Models.News
+@using Microsoft.AspNetCore.Mvc.Localization
+
+@inject IViewLocalizer Localizer
+@{
+    ViewData["Title"] = "Edit";
+}
+<a asp-action="Index" asp-controller="News" class="btn btn-primary">@Localizer["Back"]</a>
+<div class="container mt-4">
+    <h4>@Localizer["EditPublication"]</h4>
+    <hr />
+    <div class="card mb-5">
+        <form asp-action="Edit" asp-controller="News" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="Date" />
+            <div class="row g-0">
+                @if (!string.IsNullOrEmpty(Model.Image))
+                {
+                    <div class="col-md-4">
+                        <img src="@Model.Image" id="imagePreview" class="card-img-top">
+                        <div class="form-group mt-4">
+                            <label for="newImage" class="control-label fw-bold">@Localizer["NewImage"]</label>
+                            <input type="hidden" id="ImageChanged" name="ImageChanged" value="false" />
+                            <input type="hidden" asp-for="Image" id="Image" />
+                            <input type="file" asp-for="Image" name="newImage" id="newImage" class="form-control" accept=".jpg, .jpeg, .png" />
+                        </div>
+                    </div>
+                }
+                <div class="col-md-8">
+                    <div class="card-body">
+                        <div class="form-group mt-4 mb-4">
+                            <label asp-for="Title" class="control-label fw-bold">@Localizer["Title"]</label>
+                            <input asp-for="Title" class="form-control" />
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+                        <div class="form-group mt-4 mb-4">
+                            <label asp-for="Description" class="control-label fw-bold">@Localizer["Description"]</label>
+                            <textarea asp-for="Description" class="form-control"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                        @if (Model.Links.Count > 0)
+                        {
+                            <h5>@Localizer["Links"]</h5>
+                            <div id="linksContainer">
+                                @for (int i = 0; i < Model.Links.Count; i++)
+                                {
+                                    <div class="col-md-4">
+                                        <div class="form-group mt-4">
+                                            <a class="text-decoration-none" href="@Model.Links[i].Url">@Model.Links[i].Title</a>
+                                            <a class="text-decoration-none" onclick="deleteLink(@Model.Links[i].Id)"><i class="bi bi-trash3 text-black fs-5"></i></a>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        <div class="mb-3">
+                            <button type="button" id="addLink" class="btn btn-success">@Localizer["AddLink"]</button>
+                            <button type="button" id="toggleLinkContainer" class="btn btn-danger" style="display:none">@Localizer["CloseLink"]</button>
+                        </div>
+
+                        <div id="linkContainer">
+                            @if (Model.Links != null)
+                            {
+                                @for (int i = 0; i < Model.Links.Count; i++)
+                                {
+                                    <div class="mb-3" style="display: none;">
+                                        <input asp-for="Links[i].Title" class="form-control" placeholder="@Localizer["LinkTitle"]">
+                                        <span asp-validation-for="@Model.Links[i].Title" class="text-danger"></span>
+                                    </div>
+                                    <div class="mb-3" style="display: none;">
+                                        <input asp-for="Links[i].Url" class="form-control" placeholder="@Localizer["LinkUrl"]">
+                                        <span asp-validation-for="@Model.Links[i].Url" class="text-danger"></span>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <small class="text-muted mb-auto">@Model.Date.ToString("dd.MM.yyyy HH:mm")</small>
+                    </div>
+                    <div class="ms-3">
+                        <input type="submit" value="@Localizer["Done"]" class="btn btn-primary text-center" />
+                        <a class="btn btn-danger" onclick="delObj(@Model.Id)">@Localizer["Delete"]</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        function delObj(id) {
+            let deleteConfirm = confirm('@Localizer["DeleteConfirmation"]');
+            if (deleteConfirm) {
+                window.location.href = '@Url.Action("Delete", "News")?id=' + id;
+            }
+        };
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const newImageInput = document.getElementById("newImage");
+            const imagePreview = document.getElementById("imagePreview");
+            const imageField = document.getElementById("Image");
+            const imageChangedField = document.getElementById("ImageChanged");
+
+            newImageInput.addEventListener("change", function () {
+                const file = newImageInput.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        imagePreview.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                    imageChangedField.value = "true";
+                } else {
+                    imagePreview.src = imageField.value;
+                    imageChangedField.value = "false";
+                }
+            });
+        });
+    </script>
+    <script>
+        function deleteLink(linkId) {
+            let deleteConfirm = confirm('@Localizer["DeleteLinkConfirmation"]');
+            if (deleteConfirm) {
+                $.ajax({
+                    url: '@Url.Action("DeleteLink", "News")',
+                    type: 'POST',
+                    data: { id: linkId, newsId: @Model.Id },
+                    success: function (result) {
+                        if (result.success) {
+                            location.href = result.redirectTo;
+                        } else {
+                            alert('@Localizer["CannotDeleteLink"]');
+                        }
+                    },
+                    error: function () {
+                        alert('@Localizer["UnexpetedError"]');
+                    }
+                });
+            }
+        }
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            var linkIndex = @Model.Links.Count;
+            var linkContainer = $("#linkContainer");
+            var addLinkButton = $("#addLink");
+            var toggleLinkContainerButton = $("#toggleLinkContainer");
+
+            addLinkButton.click(function () {
+                var linkHtml = `<div class="link-group">
+                                        <div class="mb-3">
+                                                    <input type="text" name="Links[${linkIndex}].Title" class="form-control" placeholder="@Localizer["LinkTitle"]">
+                                        </div>
+                                        <div class="mb-3">
+                                                    <input type="text" name="Links[${linkIndex}].Url" class="form-control" placeholder="@Localizer["LinkUrl"]">
+                                        </div>
+                                    </div>`;
+                linkContainer.append(linkHtml);
+                linkIndex++;
+                toggleLinkContainerButton.show();
+            });
+
+            toggleLinkContainerButton.click(function () {
+                var lastLinkGroup = linkContainer.find(".link-group").last();
+                if (lastLinkGroup.length) {
+                    lastLinkGroup.remove();
+                    linkIndex--;
+                }
+
+                if (linkContainer.find(".link-group").length === 0) {
+                    toggleLinkContainerButton.hide();
+                }
+            });
+        });
+    </script>
+}

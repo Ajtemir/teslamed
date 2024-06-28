@@ -1,0 +1,82 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+@model Dictionary<string,int>;
+
+@{
+    ViewData["Title"] =  @Localizer["Title"];
+}
+
+<a asp-action="ShowPayDeskMainPage" class="btn btn-primary">@Localizer["BackToMainPage"]</a>
+@if (Model["diagnosticsNull"] == 1)
+{
+    <div>
+        <p class="text-center">@Localizer["NullList"]</p>
+    </div>
+}
+else
+{
+    <div class="container mt-3 mb-3">
+        <form method="get" asp-action="CashRegisterForACertainPeriodOfTime">
+            <div class="row ms-md-5">
+                <div class="col-md-3 d-flex">
+                    <label class="mt-1 me-1" for="firstDate">@Localizer["From"]:</label>
+                    <input type="date" name="firstDate" class="form-control" />
+                </div>
+                <div class="col-md-3 d-flex">
+                    <label class="mt-1 me-1" for="secondDate">@Localizer["To"]:</label>
+                    <input type="date" name="secondDate" class="form-control" />
+                </div>
+                <div class="col-md-1 d-flex justify-content-md-start justify-content-center">
+                    <button type="submit" class="p-0 border-0 bg-transparent" style="max-width: 38px" title="@Localizer["FilteringApplyReset"]">
+                        <img style="max-height: 38px" src="~/images/icons8-search.svg" />
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div>
+        <div class="text-center">
+            <h4 class="mb-0">@Localizer["Title"]:</h4>
+        </div>
+        @if (Model.Count == 0)
+        {
+            <p class="text-center">@Localizer["EmptyCashRegister"]</p>
+        }
+        else
+        {
+            <table class="table mt-1">
+                <thead>
+                    <tr>
+                        <th scope="col">@Localizer["Interval"]</th>
+                        <th scope="col">@Localizer["TotalCash"]</th>
+                        <th scope="col">@Localizer["TotalCashless"]</th>
+                        <th scope="col">@Localizer["TotalCost"]</th>
+                        @* <th scope="col">@Localizer["CashExpenditure"]</th> *@
+                        <th scope="col">@Localizer["TotalExpenditure"]</th>
+                        @* <th scope="col">@Localizer["CashProfit"]</th>
+                        <th scope="col">@Localizer["CashlessProfit"]</th> *@
+                        <th scope="col">@Localizer["TotalProfit"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th><span class="mb-0">@Localizer["From"] @ViewBag.DateFilterFrom.ToString("dd.MM.yyyy") @Localizer["To"] @ViewBag.DateFilterTo.ToString("dd.MM.yyyy")</span></th>
+                        <th>@Model["totalCash"]</th>
+                        <th>@Model["totalCashless"]</th>
+                        <th>@Model["totalCost"]</th>
+                        @* <th>@Model["cashExpenditure"]</th> *@
+                        <th>@Model["cashExpenditure"]</th>
+                        @* <th>@Model["cashProfit"]</th>
+                        <th>@Model["cashlessProfit"]</th> *@
+                        <th>@Model["totalProfit"]</th>
+                    </tr>
+                </tbody>
+            </table>
+        }
+    </div>
+}
+
+
+

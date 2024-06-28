@@ -1,0 +1,51 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+
+@inject IViewLocalizer Localizer
+@model TeslaMed.Models.FlowAccounting
+
+@{
+    ViewData["Title"] = @Localizer["Header"];
+}
+
+<a class="btn btn-primary" asp-action="CurrentAccount">@Localizer["ButtonBack"]</a>
+
+<div class="row justify-content-around ms-0 me-0">
+    <div class="col col-sm-8 col-md-6 col-lg-5 col-xl-4 col-xxl-4">
+        <form asp-action="CurrentAccountCreate" method="post" id="form">
+            <h4 class="mb-3 text-center">@Localizer["Header"]</h4>
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group mb-3">
+                <label asp-for="InventoryId" class="control-label"></label>
+                <select asp-for="InventoryId" class="form-select">
+                    @if (ViewBag.Inventories == null)
+                    {
+                        <option value="" hidden>@Localizer["InventoryNull"]</option>
+                    }
+                    else
+                    {
+                        <option value="" hidden>@Localizer["InventoryChoose"]</option>
+                        @foreach (var i in ViewBag.Inventories)
+                        {
+                            <option value="@i.Id">@i.InventoryName.Name</option>
+                        }   
+                    }                    
+                </select>
+                <span asp-validation-for="InventoryId" class="text-danger" id="nameError"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="Quantity" class="control-label"></label>
+                <input asp-for="Quantity" type="number" class="form-control" placeholder=@Localizer["TotalAmountInputPlaceholder"] />
+                <span asp-validation-for="Quantity" class="text-danger"></span>
+            </div>
+            <div class="form-group text-center mt-2">
+                <button class="btn btn-primary" type="submit">@Localizer["ButtonCreate"]</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,0 +1,89 @@
+﻿@using Microsoft.AspNetCore.Localization;
+@using Microsoft.AspNetCore.Mvc.Localization
+
+@inject IViewLocalizer Localizer
+@model List<Patient>
+@{
+    ViewData["Title"] = @Localizer["Header"];
+}
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+}
+<h2 class="text-dark text-center">@Localizer["Header"]</h2>
+<div class="container">
+    <form method="get" asp-action="Index" asp-controller="Patients">
+        <div class="mb-3">
+            <label for="filterDate">@Localizer["FilterDate"]:</label>
+            <input type="date" id="filterDate" name="filterDate" class="form-control" value="@ViewBag.filterDate"/>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-3 d-flex flex-column">
+                <label for="filterLastName">@Localizer["FilterLastName"]:</label>
+                <input type="text" id="filterLastName" name="filterLastName" class="form-control mt-auto align-self-end" value="@ViewBag.filterLastName" />
+            </div>
+            <div class="col-md-4 mb-3 d-flex flex-column">
+                <label for="filterFirstName">@Localizer["FilterFirstName"]:</label>
+                <input type="text" id="filterFirstName" name="filterFirstName" class="form-control mt-auto align-self-end" value="@ViewBag.filterFirstName" />
+            </div>
+            <div class="col-md-4 mb-3 d-flex flex-column">
+                <label for="filterPatronymic">@Localizer["FilterPatronymic"]:</label>
+                <input type="text" id="filterPatronymic" name="filterPatronymic" class="form-control mt-auto align-self-end" value="@ViewBag.filterPatronymic" />
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">@Localizer["ApplyFilters"]</button>
+        <a href="@Url.Action("Index", "Patients", new { resetFilters = true })" class="btn btn-secondary">@Localizer["ResetFilters"]</a>
+    </form>
+    @if(Model.Count == 0)
+    {
+        <p>@Localizer["NullList"]</p>
+    }
+    else
+    {
+        <table class="table mt-3 mx-auto">
+            <thead>
+                <tr>
+                    <th scope="col">@Localizer["Code"]</th>
+                    <th scope="col">@Localizer["Name"]</th>
+                    <th scope="col">@Localizer["Surname"]</th>
+                    <th scope="col">@Localizer["Patronymic"]</th>
+                    <th scope="col">@Localizer["DateOfBirth"]</th>
+                    <th scope="col">@Localizer["Gender"]</th>
+                    <th scope="col">@Localizer["PhoneNumber"]</th>
+                    <th scope="col">@Localizer["SecondPhoneNumber"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var patient in Model)
+                {
+                    <tr onclick="window.location.href = '@Url.Action("Details", "Patients", new {id = patient.Id})'">
+                        <td>@patient.Code</td>
+                        <td>@patient.Name</td>
+                        <td>@patient.Surname</td>
+                        <td>@patient.Patronymic</td>
+                        <td>@patient.BirthDate.ToString("d")</td>
+                        <td>
+                            @if (requestCulture.RequestCulture.UICulture.Name == "ky")
+                            {
+                                @if (patient.Gender == "М")
+                                {
+                                    <text>Э</text>
+                                }
+                                else
+                                {
+                                    <text>А</text>
+                                }
+                            }
+                            else
+                            {
+                                @patient.Gender
+                            }
+                        </td>
+                        <td>@patient.PhoneNumber</td>
+                        <td>@patient.SecondPhoneNumber</td>
+
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

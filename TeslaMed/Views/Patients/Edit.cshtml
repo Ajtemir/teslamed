@@ -1,0 +1,73 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+
+@inject IViewLocalizer Localizer
+@model TeslaMed.ViewModels.PatientCreateViewModel;
+
+@{
+    ViewData["Title"] = @Localizer["Header"];
+}
+
+<div class="row justify-content-around ms-0 me-0">
+    <div class="col col-sm-8 col-md-6 col-lg-5 col-xl-4 col-xxl-3">
+    <form asp-action="Edit" method="post">
+            <h4>@Localizer["Header"]</h4>
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input name="id" value="@ViewBag.Id" hidden/>
+        <input name="code" value="@ViewBag.Code" hidden />
+        <div class="form-group">
+            <label class="control-label">@Localizer["Name"]</label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label class="control-label">@Localizer["Surname"]</label>
+            <input asp-for="Surname" class="form-control" />
+            <span asp-validation-for="Surname" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label class="control-label">@Localizer["Patronymic"]</label>
+            <input asp-for="Patronymic" class="form-control" />
+            <span asp-validation-for="Patronymic" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label class="control-label">@Localizer["Gender"]</label>
+            <select asp-for="Gender" class="form-select">
+                    <option value="М">@Localizer["Male"]</option>
+                    <option value="Ж">@Localizer["Female"]</option>
+            </select>
+            <span asp-validation-for="Gender" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label class="control-label">@Localizer["DateOfBirth"]</label>
+            <input asp-for="BirthDate" type="date" class="form-control" />
+            <span asp-validation-for="BirthDate" class="text-danger"></span>
+        </div>
+        <div class="d-flex justify-content-between">
+            <div class="form-group align-self-end me-3">
+                <label class="control-label">@Localizer["PhoneNumber"]</label>
+                <input asp-for="PhoneNumber" class="form-control" />
+                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label class="control-label">@Localizer["SecondPhoneNumber"]</label>
+                <input asp-for="SecondPhoneNumber" class="form-control" />
+                <span asp-validation-for="SecondPhoneNumber" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label">@Localizer["Comment"]</label>
+            <input asp-for="Comment" class="form-control" />
+            <span asp-validation-for="Comment" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+                <input type="submit" value=@Localizer["ButtonEdit"] class="btn btn-primary mt-3" />
+        </div>
+    </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,0 +1,243 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+@model TeslaMed.ViewModels.DiagnosticsAndOperatingCosts
+
+@{
+    ViewData["Title"] = $"{Localizer[$"{ViewBag.ReportType}"]} {Localizer["Title"]}";
+}
+
+<a asp-action="ShowReportMainPage" class="btn btn-primary">@Localizer["BackToMainPage"]</a>
+<div class="container mt-3 mb-3">
+    <form method="get" asp-action="@ViewContext.RouteData.Values["Action"]">
+        <div class="row ms-md-5">
+            <div class="col-md-3 d-flex">
+                <label class="mt-1 me-1" for="firstDate">@Localizer["From"]:</label>
+                <input type="date" name="firstDate" class="form-control" />
+            </div>
+            <div class="col-md-3 d-flex">
+                <label class="mt-1 me-1" for="secondDate">@Localizer["To"]:</label>
+                <input type="date" name="secondDate" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <select name="research" class="form-control">
+                    <option value="">@Localizer["AllTypes"]</option>
+                    @foreach (var researchMethod in ViewBag.ResearchMethods)
+                    {
+                        <option value="@researchMethod.Id">@researchMethod.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-1 d-flex justify-content-md-start justify-content-center">
+                <button type="submit" class="p-0 border-0 bg-transparent" style="max-width: 38px" title="@Localizer["FilteringApplyReset"]">
+                    <img style="max-height: 38px" src="~/images/icons8-search.svg" />
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div>
+    <div class="text-center">
+        <h4 class="mb-0">@Localizer[$"{ViewBag.ReportType}"] @Localizer["Title"]:</h4>
+        <div>
+            @if (ViewBag.DateFilterFrom != null)
+            {
+                <span class="mb-0">@Localizer["From"] @ViewBag.DateFilterFrom.ToString("dd.MM.yyyy HH:mm")</span>
+            }
+            @if (ViewBag.DateFilterTo != null)
+            {
+                <span class="mb-0">@Localizer["To"] @ViewBag.DateFilterTo.ToString("dd.MM.yyyy HH:mm")</span>
+            }
+        </div>
+    </div>
+    @if (Model.Diagnostics.Count == 0)
+    {
+        <p class="text-center">@Localizer["EmptyDiagnosticsList"]</p>
+    }
+    else
+    {
+        <table class="table mt-1">
+            <thead>
+                <tr>
+                    <th scope="col">№</th>
+                    <th scope="col">@Localizer["Code"]</th>
+                    <th scope="col">@Localizer["DateArrival"]</th>
+                    <th scope="col">@Localizer["Surname"]</th>
+                    <th scope="col">@Localizer["Name"]</th>
+                    <th scope="col">@Localizer["Patronymic"]</th>
+                    <th scope="col">@Localizer["ArriavalType"]</th>
+                    <th scope="col">@Localizer["Doctor"]</th>
+                    <th scope="col">@Localizer["Department"]</th>
+                    <th scope="col">@Localizer["TypesOfDiagnostic"]</th>
+                    <th scope="col">@Localizer["TotalCost"]</th>
+                    <th scope="col">@Localizer["Discount"]</th>
+                    <th scope="col">@Localizer["BeenPaid"]</th>
+                    <th scope="col">@Localizer["PaymentType"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.Diagnostics.Count; i++)
+                {
+                    <tr>
+                        <th>@(i + 1)</th>
+                        <th>@Model.Diagnostics[i].Patient.Code</th>
+                        <th>@Model.Diagnostics[i].TimeArrival</th>
+                        <th>@Model.Diagnostics[i].Patient.Surname</th>
+                        <th>@Model.Diagnostics[i].Patient.Name</th>
+                        <th>@Model.Diagnostics[i].Patient.Patronymic</th>
+                        <th>@Model.Diagnostics[i].ArrivalType.Name</th>
+                        <th>
+                            @if (Model.Diagnostics[i].ArrivalTypeDoctor != null)
+                            {
+                                if (Model.Diagnostics[i].ArrivalTypeDoctor.Patronymic != null)
+                                {
+                                    <p>@Model.Diagnostics[i].ArrivalTypeDoctor.Surname @Model.Diagnostics[i].ArrivalTypeDoctor.Name.ToCharArray()[0]. @Model.Diagnostics[i].ArrivalTypeDoctor.Patronymic.ToCharArray()[0].</p>
+                                }
+                                else
+                                {
+                                    <p>@Model.Diagnostics[i].ArrivalTypeDoctor.Surname @Model.Diagnostics[i].ArrivalTypeDoctor.Name.ToCharArray()[0].</p>
+                                }
+                            }
+                            else
+                            {
+                                <p>-</p>
+                            }
+                        </th>
+                        <th>@Model.Diagnostics[i].Doctor.Departments[0].Name</th>
+                        <th>
+                            @foreach (var d in Model.Diagnostics[i].TypesOfDiagnostics)
+                            {
+                                <p class="mb-0">@d.ResearchMethod.Name</p>
+                                <p class="mt-0">@d.Name</p>
+                            }
+                        </th>
+                        <th>
+                            @TotalDiagnosticPrice(Model.Diagnostics[i].TypesOfDiagnostics) сом
+                        </th>
+                        <th>
+                            @if (Model.Diagnostics[i].Discount != null)
+                            {
+                                <p class="mb-0">@Model.Diagnostics[i].Discount.Percent %</p>
+                                <p class="mt-0">@Model.Diagnostics[i].Discount.Name</p>
+                            }
+                            else
+                            {
+                                <p>-</p>
+                            }
+                        </th>
+                        <th>@Model.Diagnostics[i].BeenPaid сом</th>
+                        <th>
+                            @if (Model.Diagnostics[i].CashPayment > 0)
+                            {
+                                <input class="cash" value="@Model.Diagnostics[i].CashPayment" hidden />
+                                <p>@Localizer["CashPayment"]</p>
+                            }
+                            @if (Model.Diagnostics[i].CashlessPayment > 0)
+                            {
+                                <input class="cashless" value="@Model.Diagnostics[i].CashlessPayment" hidden />
+                                <p>@Localizer["CashlessPayment"]</p>
+                            }
+                            @if (Model.Diagnostics[i].CashPayment == 0 && Model.Diagnostics[i].CashlessPayment == 0)
+                            {
+                                <p>-</p>
+                            }
+                        </th>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    <p class="mb-0 fw-bold" id="totalCash"></p>
+    <p class="mb-0 fw-bold" id="totalCashless"></p>
+    <p class="mb-0 fw-bold" id="total"></p>
+</div>
+
+<div>
+    <h4 class="text-center">@Localizer[$"{ViewBag.ReportType}"] @Localizer["ReportProfit"]:</h4>
+    @if (Model.OperatingCosts.Count == 0)
+    {
+        <p class="text-center">@Localizer["EmptyOperatingCostsList"]</p>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">№</th>
+                    <th scope="col">@Localizer["OperatingCostName"]</th>
+                    <th scope="col">@Localizer["OperatingCostCreatingDate"]</th>
+                    <th scope="col">@Localizer["OperatingCostType"]</th>
+                    <th scope="col">@Localizer["OperatingCostUnit"]</th>
+                    <th scope="col">@Localizer["OperatingCostTotal"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.OperatingCosts.Count; i++)
+                {
+                    <tr>
+                        <th>@(i + 1)</th>
+                        <th>@Model.OperatingCosts[i].OperatingCostName.Name</th>
+                        <th>@Model.OperatingCosts[i].DateOfCreation</th>
+                        <th>@Model.OperatingCosts[i].TypeOfCosts.Name</th>
+                        <th>@Model.OperatingCosts[i].OperatingCostName.Unit</th>
+                        <th>
+                            <input class="totalOperatingCost" value="@Model.OperatingCosts[i].TotalAmount" hidden />
+                            @Model.OperatingCosts[i].TotalAmount
+                        </th>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    <p class="fw-bold" id="sumTotalOperatingCost"></p>
+</div>
+<div class="text-center fw-bold">
+    <h4>@Localizer["TotalReport"].Value.Split(" ")[0] @Localizer[$"{ViewBag.ReportType}"].Value.ToLower() @Localizer["TotalReport"].Value.Split(" ")[1]:</h4>
+    <p class="mb-0" id="cashProfit"></p>
+    <p class="mb-0" id="cashlessProfit"></p>
+    <p id="dailyReportTotal"></p>
+</div>
+<div class="mt-5 fw-bold">
+    <div class="d-flex">
+        <div class="mb-0">@Localizer["ResponsiblePerson"]: </div>
+        <div class="bg-black w-100 ms-1" style="max-width: 350px; height: 1px; margin-top: 20px;"></div>
+    </div>
+    <p class="mt-0" style="margin-left: 250px;">(@Localizer["InitialsAndSignature"])</p>
+</div>
+
+@functions {
+    private string TotalDiagnosticPrice(List<TypeOfDiagnostics> list)
+    {
+        int totalPrice = 0;
+        foreach (var t in list)
+            totalPrice += t.Price;
+        return totalPrice.ToString();
+    }
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            let totalCash = 0;
+            let totalCashless = 0;
+            let totalOperatingCost = 0;
+            $('.cash').each(function () {
+                totalCash += parseInt($(this).val());
+            });
+            $('.cashless').each(function () {
+                totalCashless += parseInt($(this).val());
+            });
+            $('.totalOperatingCost').each(function () {
+                totalOperatingCost += parseInt($(this).val());
+            });
+            $('#totalCash').text('@Localizer["TotalCashSum"]: ' + totalCash + ' @Localizer["Currency"]');
+            $('#totalCashless').text('@Localizer["TotalCashlessSum"]: ' + totalCashless + ' @Localizer["Currency"]');
+            $('#total').text('@Localizer["TotalSum"]: ' + (totalCash + totalCashless) + ' @Localizer["Currency"]');
+            $('#sumTotalOperatingCost').text('@Localizer["TotalSum"]: ' + totalOperatingCost + ' @Localizer["Currency"]');
+            $('#cashProfit').text('@Localizer["CashProfit"]: ' + (totalCash - totalOperatingCost) + ' @Localizer["Currency"]');
+            $('#cashlessProfit').text('@Localizer["CashlessProfit"]: ' + totalCashless + ' @Localizer["Currency"]');
+            $('#dailyReportTotal').text('@Localizer["TotalDailyReportIncome"]: ' + ((totalCash + totalCashless) - totalOperatingCost) + ' @Localizer["Currency"]');
+        });
+    </script>
+}

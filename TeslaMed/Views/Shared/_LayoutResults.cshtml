@@ -1,0 +1,75 @@
+﻿@using Microsoft.AspNetCore.Localization;
+@using Microsoft.AspNetCore.Mvc.Localization
+
+@inject IViewLocalizer Localizer
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var returnUrl = string.IsNullOrEmpty(Context.Request.Path) ? "~/" : $"~{Context.Request.Path.Value}";
+
+}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/TeslaMed.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
+    <link rel="icon" type="image/png" href="~/images/icon.png">
+    <style>
+
+        .navbar {
+            background-color: #0161AB;
+            color: white;
+        }
+
+        .big-text {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header style="background-color:#0161AB; height: 110px;">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light">
+            <div class="container-fluid">
+                <a asp-action="MainPage" asp-controller="News">
+                    <img src="~/images/Logo_TESLAMED2.png" alt="teslamedLogo" style="width: 200px;" />
+                </a>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1 py-3">
+                    </ul>
+
+                    <ul class="navbar-nav justify-content-end">
+                        <li class="nav-item py-3">
+                            @if (requestCulture.RequestCulture.UICulture.Name == "ru")
+                            {
+                                    <a class="navbar-brand d-flex pt-0" asp-area="" asp-action="SetLanguage" asp-controller="Account" asp-route-culture="ky" asp-route-returnUrl="@returnUrl">
+                                        <img src="~/images/flagRU.svg" alt="flagRU" style="max-width: 50px;" /><p class="mb-0 big-text ps-1 text-light">RU</p>
+                                    </a>
+                            }
+                            @if (requestCulture.RequestCulture.UICulture.Name == "ky")
+                            {
+                                    <a class="navbar-brand d-flex pt-0" asp-area="" asp-action="SetLanguage" asp-controller="Account" asp-route-culture="ru" asp-route-returnUrl="@returnUrl">
+                                        <img src="~/images/flagKG.svg" alt="flagKG" style="max-width: 50px;" /><p class="mb-0 big-text ps-1 text-light">KG</p>
+                                    </a>
+                            }
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+</body>
+</html>

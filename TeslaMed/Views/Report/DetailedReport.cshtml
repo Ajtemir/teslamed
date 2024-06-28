@@ -1,0 +1,247 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+@model List<Diagnostics>
+
+@{
+    ViewData["Title"] = Localizer["Title"];
+    var totalReportList = new List<string>();
+    int total = 0;
+}
+
+<a asp-action="ShowReportMainPage" class="btn btn-primary">@Localizer["BackToMainPage"]</a>
+<div class="container mt-3 mb-3">
+    <form method="get" asp-action="@ViewContext.RouteData.Values["Action"]">
+        <div class="row ms-md-5">
+            <div class="col-lg">
+                <select name="department" class="form-control">
+                    <option value="">@Localizer["AllDepartments"]</option>
+                    @foreach (var department in ViewBag.Departments)
+                    {
+                        <option value="@department.Id">@department.Name</option>
+                    }
+                </select>
+            </div>    
+            <div class="col-lg">
+                <select name="userDoctor" class="form-control">
+                    <option value="">@Localizer["AllDoctors"]</option>
+                    @foreach (var doctor in ViewBag.UserDoctors)
+                    {
+                        <option value="@doctor.Id">@doctor.Name</option>
+                    }
+                </select>
+            </div> 
+            <div class="col-lg">
+                <select name="typeOfDiagnostics" class="form-control">
+                    <option value="">@Localizer["AllTypesOfDiagnostics"]</option>
+                    @foreach (var type in ViewBag.TypesOfDiagnostics)
+                    {
+                        <option value="@type.Id">@type.ResearchMethod.Name @type.Name</option>
+                    }
+                </select>
+            </div> 
+            <div class="col-lg d-flex">
+                <label class="mt-1 me-1" for="firstDate">@Localizer["From"]:</label>
+                <input type="date" name="firstDate" class="form-control" />
+            </div>
+            <div class="col-lg d-flex">
+                <label class="mt-1 me-1" for="secondDate">@Localizer["To"]:</label>
+                <input type="date" name="secondDate" class="form-control" />
+            </div>              
+            <div class="col-lg-1 d-flex justify-content-lg-start justify-content-center" >
+                <button type="submit" class="p-0 border-0 bg-transparent" style="max-width: 38px" title="@Localizer["FilteringApplyReset"]">
+                    <img style="max-height: 38px" src="~/images/icons8-search.svg"/>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div>
+    <div class="text-center">
+        <h4>@Localizer["Title"]</h4>
+        <div>
+            @if (ViewBag.DateFilterFrom != null)
+            {
+                <span class="mb-0">@Localizer["From"] @ViewBag.DateFilterFrom.ToString("dd.MM.yyyy HH:mm")</span>
+            }
+            @if (ViewBag.DateFilterTo != null)
+            {
+                <span class="mb-0">@Localizer["To"] @ViewBag.DateFilterTo.ToString("dd.MM.yyyy HH:mm")</span>
+            }
+        </div>
+    </div>
+    @if (Model.Count == 0)
+    {
+        <p class="text-center">@Localizer["EmptyDiagnosticsList"]</p>
+    }
+    else
+    {
+        @foreach (var doctor in ViewBag.UserDoctors)
+        {
+            total = 0;
+            @if (!Model.Any(d => d.Doctor == doctor))
+            {
+                continue;
+            }
+            <h5>@Localizer["Doctor"] @MultipleDepartmentsOutput(doctor.Departments) - @doctor.Surname @doctor.Name @doctor.Patronymic</h5>
+            <table class="table fw-bold">
+                <thead>
+                    <tr>
+                        <th scope="col">№</th>
+                        <th scope="col">@Localizer["Code"]</th>
+                        <th scope="col">@Localizer["Surname"]</th>
+                        <th scope="col">@Localizer["Name"]</th>
+                        <th scope="col">@Localizer["Patronymic"]</th>
+                        <th scope="col">@Localizer["TypesOfDiagnostic"]</th>
+                        <th scope="col">@Localizer["TotalCost"]</th>
+                        <th scope="col">@Localizer["Discount"]</th>
+                        <th scope="col">@Localizer["BeenPaid"]</th>
+                        <th scope="col">@Localizer["Debt"]</th>
+                        <th scope="col">@Localizer["Comments"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < Model.Count; i ++)
+                    {
+                        if (Model[i].Doctor == doctor)
+                        {
+                            <tr>
+                                <td>@(i + 1)</td>
+                                <td>@Model[i].Patient.Code</td>
+                                <td>@Model[i].Patient.Surname</td>
+                                <td>@Model[i].Patient.Name</td>
+                                <td>@Model[i].Patient.Patronymic</td>
+                                <td>
+                                    @foreach (var type in Model[i].TypesOfDiagnostics)
+                                    {
+                                        <p class="mb-0">@type.ResearchMethod.Name @type.Name</p>
+                                    }
+                                </td>
+                                <td>@TotalDiagnosticPrice(Model[i], ref total) сом</td>
+                                <td>
+                                    @if (Model[i].Discount != null)
+                                    {
+                                        <p class="mb-0">@Model[i].Discount.Percent % @Model[i].Discount.Name</p>
+                                    }
+                                    else
+                                    {
+                                        <p>-</p>
+                                    }
+                                </td>
+                                <td>@Model[i].BeenPaid сом</td>
+                                <td>@Model[i].Debt сом</td>
+                                <td>
+                                    <button id="modalOpen" onclick="commentsOpen(@Model[i].Id)" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#comments">@Localizer["Comments"]</button>
+                                </td>
+                            </tr>
+                            DoctorTotalReport(Model[i], ref totalReportList);
+                        }
+                    }
+                </tbody>
+            </table>
+            <p class="mb-0 fw-bold" id="total">@Localizer["DoctorPersonalTotal"]: @total сом</p>
+            <hr class="mt-1 mb-3" />
+        }
+    }
+</div>
+
+<div class="fw-bold">
+    <h5 class="text-center">@Localizer["TotalDetailedReport"]</h5>
+    @for (int i = 0; i < totalReportList.Count; i++)
+    {
+        <p class="mb-0">&nbsp&nbsp&nbsp@(i + 1). @Localizer["Doctor"] @totalReportList[i].Split(" ")[0].Replace("_", " ").Trim():</p>
+        <p class="mb-0">@(i + 1).1. @Localizer["TotalDiagnosticTypes"]: @totalReportList[i].Split(" ")[1]</p>
+        <p class="mb-1">@(i + 1).2. @Localizer["TotalDiagnosticCost"]: @totalReportList[i].Split(" ")[2] сом</p>
+    }
+    <p>@Localizer["FinalReport"]: @FinalReport(totalReportList) сом</p>
+</div>
+
+<div class="mt-5 fw-bold">
+    <div class="d-flex">
+        <div class="mb-0">@Localizer["ResponsiblePerson"]: </div>
+        <hr class="ms-1 mb-0" width="350" size="3" style="color: black; opacity: 1;" />
+    </div>
+    <p class="mt-0" style="margin-left: 250px;">(@Localizer["InitialsAndSignature"])</p>
+</div>
+
+<div id="comments" class="modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@Localizer["Comments"]</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body"></div>
+            <div class="btn-group mx-1 mt-3">
+                <button class="btn btn-outline-primary" onclick="commentsScrollUp()">@Localizer["CommentsUp"]</button>
+                <button class="btn btn-outline-primary" onclick="commentsScrollDown()">@Localizer["CommentsDown"]</button>                
+            </div>           
+            <div class="modal-footer">    
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Localizer["CloseModal"]</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    private string MultipleDepartmentsOutput(List<Department> list)
+    {
+        string result = default;
+        foreach (var department in list)
+            result += department.Name + "/";
+        return result.Remove(result.Length - 1);
+    }
+
+    private int TotalDiagnosticPrice(Diagnostics diagnostic, ref int total)
+    {
+        int totalPrice = 0;
+        foreach (var t in diagnostic.TypesOfDiagnostics)
+            totalPrice += t.Price;
+        total += diagnostic.BeenPaid ?? 0;
+        return totalPrice;
+    }
+
+    private void DoctorTotalReport (Diagnostics diagnostic, ref List<string> list)
+    {
+        string doctor = $"{diagnostic.Doctor.Surname.Replace(" ", "_")}_{diagnostic.Doctor.Name.Replace(" ", "_")}_{diagnostic.Doctor.Patronymic.Replace(" ", "_")}";
+        var existingRecord = list.FirstOrDefault(l => l.Contains(doctor));
+        var index = 0;
+        if (existingRecord != null)
+        {
+            index = list.IndexOf(existingRecord);
+            existingRecord = $"{existingRecord.Split(" ")[0]} {(Convert.ToInt32(existingRecord.Split(" ")[1]) + diagnostic.TypesOfDiagnostics.Count).ToString()} {existingRecord.Split(" ")[2]}";
+            existingRecord = $"{existingRecord.Split(" ")[0]} {existingRecord.Split(" ")[1]} {(Convert.ToInt32(existingRecord.Split(" ")[2]) + diagnostic.BeenPaid).ToString()}";
+            list[index] = existingRecord;
+        }
+        else
+            list.Add($"{doctor} {diagnostic.TypesOfDiagnostics.Count} {diagnostic.BeenPaid}");
+    }
+
+    private int FinalReport(List<string> list)
+    {
+        int result = 0;
+        foreach (var l in list)
+            result += Convert.ToInt32(l.Split(" ")[2]);
+        return result;
+    }
+}
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        function commentsOpen (x) {         
+            $('.modal-body').load('@Url.Action("CommentsList","Comments")?id=' + x);
+        };
+
+        function commentsScrollDown () {
+            $('.modal-body').scrollTop(5000);
+        };
+
+        function commentsScrollUp () {
+            $('.modal-body').scrollTop(-5000);
+        };
+    </script>
+}

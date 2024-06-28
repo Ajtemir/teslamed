@@ -1,0 +1,444 @@
+﻿@using TeslaMed.ViewModels
+@using Microsoft.AspNetCore.Mvc.Localization
+
+@inject IViewLocalizer Localizer
+@model TeslaMed.ViewModels.PatientDetailsViewModel;
+
+@{
+    ViewData["Title"] = Localizer["Header"];
+    List<TypeOfDiagnostics> typesOfDiagnostics = new List<TypeOfDiagnostics>();
+    List<Diagnostics> DiagnosticsNew = new List<Diagnostics>();
+    List<Diagnostics> DiagnosticsOld = new List<Diagnostics>();
+    var textColot = (int? paid, int totalCost) => paid == totalCost ? "text-success" : "text-danger";
+}
+
+<div>
+    @* <input value="@Localizer["ButtonCurrentDiagnostics"]" type="button" class="btn btn-primary me-3" onclick="NewShow()" />
+    <input value="@Localizer["ButtonCompletedDiagnostics"]" type="button" class="btn btn-primary" onclick="OldShow()" /> *@
+</div>
+<div class="row justify-content-between me-0 ms-0">
+    <div class="col-12 col-md-5">
+        <h4 class="text-center">@Localizer["Header"]</h4>        
+        <table class="fs-6">
+            <tr>
+                <td class="fw-bold pb-3">@Localizer["Code"]</td>
+                <td class="ps-5 pb-3">@Model.Patient.Code</td>
+            </tr>
+            <tr>
+                <td class="fw-bold pb-3">@Localizer["Name"]</td>
+                <td class="ps-5 pb-3">@Model.Patient.Name</td>
+            </tr>
+            <tr>
+                <td class="fw-bold pb-3">@Localizer["Surname"]</td>
+                <td class="ps-5 pb-3">@Model.Patient.Surname</td>
+            </tr>
+            @if (Model.Patient.Patronymic != null)
+            {
+                <tr>
+                    <td class="fw-bold pb-3">@Localizer["Patronymic"]</td>
+                    <td class="ps-5 pb-3">@Model.Patient.Patronymic</td>
+                </tr>
+            }
+            <tr>
+                <td class="fw-bold pb-3">@Localizer["Gender"]</td>
+                <td class="ps-5 pb-3">@Model.Patient.Gender</td>
+            </tr>
+            <tr>
+                <td class="fw-bold pb-3">@Localizer["DateOfBirth"]</td>
+                <td class="ps-5 pb-3">@Model.Patient.BirthDate.ToLongDateString()</td>
+            </tr>
+            <tr>
+                <td class="fw-bold pb-3">@Localizer["PhoneNumber"]</td>
+                <td class="ps-5 pb-3">@Model.Patient.PhoneNumber</td>
+            </tr>
+            @if (Model.Patient.SecondPhoneNumber != null)
+            {
+                <tr>
+                    <td class="fw-bold pb-3">@Localizer["SecondPhoneNumber"]</td>
+                    <td class="ps-5 pb-3">@Model.Patient.SecondPhoneNumber</td>
+                </tr>
+            }
+        </table>
+        @if (Model.Patient.Comment != null)
+        {
+            <p class="fw-bold mb-1">@Localizer["Comment"]:</p>
+            <span>@Model.Patient.Comment</span>
+        }
+        <div class="text-center">
+            @if(Model.Patient.HasDiagnostics == false)
+            {
+                <a onclick="delObj(@Model.Patient.Id)" class="btn btn-danger">@Localizer["ButtonDelete"]</a>
+            }
+            <a asp-action="Edit" asp-route-id="@Model.Patient.Id" class="btn btn-primary">@Localizer["ButtonEdit"]</a>
+            <a asp-action="DiagnosticsCreate" asp-route-id="@Model.Patient.Id" class="btn btn-primary">@Localizer["AddDiagnostics"]</a>
+            
+        </div>
+    </div>
+    @foreach (var diagnostics in Model.Diagnostics)
+    {
+        if (diagnostics.Status == "завершена")
+        {
+            DiagnosticsOld.Add(diagnostics);
+        }
+        else
+        {
+            DiagnosticsNew.Add(diagnostics);
+        }
+    }
+    <div class="col-12 col-md-7" id="newD" style="display: block">
+        <h4 class="text-center">@Localizer["HeaderNewDiagnostics"]</h4>
+        @if (DiagnosticsNew.Count == 0)
+        {
+            <p class="text-center">@Localizer["NullListNewDiagnostics"]</p>
+        }
+        else
+        {
+            for (int i = 0; i < DiagnosticsNew.Count; i++)
+            {
+                typesOfDiagnostics = DiagnosticsNew[i].TypesOfDiagnostics;
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap">
+                            <div class="me-3">
+                                <table>
+                                    <tr>
+                                        <td class="fw-bold pb-3">@Localizer["Date"]</td>
+                                        <td class="ps-2 pb-3">@DiagnosticsNew[i].TimeArrival.ToShortDateString()</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="me-3">
+                                <table>
+                                    <tr>
+                                        <td class="fw-bold pb-3">@Localizer["Time"]</td>
+                                        <td class="ps-2 pb-3">@DiagnosticsNew[i].TimeArrival.ToShortTimeString()</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="me-3">
+                                <table>
+                                    <tr>
+                                        <td class="fw-bold pb-3">@Localizer["ArrivalType"]</td>
+                                        <td class="ps-2 pb-3">@DiagnosticsNew[i].ArrivalType.Name</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            @if (DiagnosticsNew[i].ArrivalTypeDoctor != null)
+                            {
+                                <div class="me-3">
+                                    <table>
+                                    <tr>
+                                        <td class="fw-bold pb-3">@Localizer["FreelanceDoctor"]</td>
+                                        @if (DiagnosticsNew[i].ArrivalTypeDoctor.Patronymic != null)
+                                        {
+                                            <td class="ps-2 pb-3">@DiagnosticsNew[i].ArrivalTypeDoctor.Name @DiagnosticsNew[i].ArrivalTypeDoctor.Surname @DiagnosticsNew[i].ArrivalTypeDoctor.Patronymic</td>
+                                        }
+                                        else
+                                        {
+                                            <td class="ps-2 pb-3">@DiagnosticsNew[i].ArrivalTypeDoctor.Name @DiagnosticsNew[i].ArrivalTypeDoctor.Surname</td>
+                                        }
+                                    </tr>
+                                    </table>
+                                </div>
+                            }
+                            @foreach (TypeOfDiagnostics typeOfDiagnostics in DiagnosticsNew[i].TypesOfDiagnostics)
+                            {
+                                <div class="me-3">
+                                    <table>
+                                        <tr>
+                                            <td class="fw-bold pb-3">@Localizer["TypeOfDiagnostics"]</td>
+                                            <td class="ps-2 pb-3">@typeOfDiagnostics.ResearchMethod.Name @typeOfDiagnostics.Name @Localizer["Price"] @typeOfDiagnostics.Price</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            }
+                            @if(@DiagnosticsNew[i].Discount != null)
+                            {
+                                <div class="me-3">
+                                <table>
+                                    <tr>
+                                        <td class="fw-bold pb-3">@Localizer["Discount"]</td>
+                                        <td class="ps-2 pb-3">@DiagnosticsNew[i].Discount.Name @Localizer["Persent"] @DiagnosticsNew[i].Discount.Percent</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            }
+                            <div class="me-3">
+                                <table>
+                                    <tr>
+                                        <td class="fw-bold pb-3">@Localizer["StaffDoctor"]</td>
+                                        @if (@DiagnosticsNew[i].Doctor.Patronymic != null)
+                                        {
+                                            <td class="ps-2 pb-3">@DiagnosticsNew[i].Doctor.Name @DiagnosticsNew[i].Doctor.Surname @DiagnosticsNew[i].Doctor.Patronymic</td>
+                                        }   
+                                        else
+                                        {
+                                            <td class="ps-2 pb-3">@DiagnosticsNew[i].Doctor.Name @DiagnosticsNew[i].Doctor.Surname</td>
+                                        }
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="me-3">
+                                <table>
+                                    <tr>
+                                        <td class="fw-bold pb-3">@Localizer["Paid"]</td>
+                                        @if (@DiagnosticsNew[i].BeenPaid == null)
+                                        {
+                                            <td class="ps-2 pb-3">0</td>
+                                        }
+                                        else
+                                        {
+                                            <td class="ps-2 pb-3 @textColot(DiagnosticsNew[i].BeenPaid, DiagnosticsNew[i].TotalCost)">@DiagnosticsNew[i].BeenPaid</td>
+                                        }
+                                    </tr>
+                                </table>
+                            </div>
+                            @if (DiagnosticsNew[i].Debt != 0)
+                            {
+                                <div class="me-3">
+                                    <table>
+                                        <tr>
+                                            <td class="fw-bold pb-3">@Localizer["Debt"]</td>
+                                            <td class="ps-2 pb-3 text-danger">@DiagnosticsNew[i].Debt</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            }
+                            @if (DiagnosticsNew[i].IsPaidInfull == false)
+                            {
+                                <div class="me-3">
+                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#payment_@i">@Localizer["Payment"]</button>
+                                </div>
+                            }
+                            <div class="modal fade" id="payment_@i" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h1 class="modal-title fs-5" id="exampleModalLabel">@Localizer["PaymentAction"]</h1>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            @await Html.PartialAsync("PartialViews/PaymentPartialView.cshtml", 
+                                            new PaymentViewModel() { DiagnosticId = DiagnosticsNew[i].Id, Debt = DiagnosticsNew[i].Debt, TypeOfCashlessPayment = DiagnosticsNew[i].TypeOfCashlessPayment, TypesOfCashlessPayment = Model.TypesOfCashlessPayment})
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="me-3">
+                                <table>
+                                    <tr>
+                                        <td class="fw-bold pb-3">@Localizer["ImageStatus"]</td>
+                                        <td class="ps-2 pb-3 @StatusResult(DiagnosticsNew[i].ImagesStatus)[1]">@Localizer[DiagnosticsNew[i].ImagesStatus]</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <a class="btn btn-outline-primary me-3" asp-action="CreateEntry" asp-controller="Doctors" asp-route-diagnosticsId="@DiagnosticsNew[i].Id">@Localizer["CreateEntry"]</a>
+                            
+                            <a class="btn btn-primary" asp-action="DiagnosticsDetails" asp-controller="Patients" asp-route-id="@DiagnosticsNew[i].Id">@Localizer["More"]</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+    <div class="col-12 col-md-7" id="oldD" style="display: none">
+        <h4 class="text-center">@Localizer["HeaderOldDiagnostics"]</h4>
+        @if (DiagnosticsOld.Count == 0)
+        {
+            <p class="text-center">@Localizer["NullListOldDiagnostics"]</p>
+        }
+        else
+        {
+            for (int i = 0; i < DiagnosticsOld.Count; i++)
+            {
+                typesOfDiagnostics = DiagnosticsOld[i].TypesOfDiagnostics;
+                <div class="card mb-3" onclick="window.location.href = '@Url.Action("DiagnosticsDetails", "Patients", new {id = DiagnosticsOld[i].Id})'">
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap">
+                            <div class="me-3">
+                                <table>
+                                    <tr>
+                                        <td class="fw-bold pb-3">@Localizer["Date"]</td>
+                                        <td class="ps-2 pb-3">@DiagnosticsOld[i].TimeArrival.ToShortDateString()</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="me-3">
+                                <table>
+                                    <tr>
+                                        <td class="fw-bold pb-3">@Localizer["Time"]</td>
+                                        <td class="ps-2 pb-3">@DiagnosticsOld[i].TimeArrival.ToShortTimeString()</td>
+                                    </tr>
+                                </table>
+                            </div class="me-3">
+                            <div class="me-3">
+                                <table>
+                                    <tr>
+                                        <td class="fw-bold pb-3">@Localizer["ArrivalType"]</td>
+                                        <td class="ps-2 pb-3">@DiagnosticsOld[i].ArrivalType.Name</td>
+                                    </tr>
+                                </table>
+                            </div class="me-3">
+                            @if (DiagnosticsOld[i].ArrivalTypeDoctor != null)
+                            {
+                                <div>
+                                    <table>
+                                    <tr>
+                                        <td class="fw-bold pb-3">@Localizer["FreelanceDoctor"]</td>
+                                        @if (DiagnosticsOld[i].ArrivalTypeDoctor.Patronymic != null)
+                                        {
+                                            <td class="ps-2 pb-3">@DiagnosticsOld[i].ArrivalTypeDoctor.Name @DiagnosticsOld[i].ArrivalTypeDoctor.Surname @DiagnosticsOld[i].ArrivalTypeDoctor.Patronymic</td>
+                                        }
+                                        else
+                                        {
+                                            <td class="ps-2 pb-3">@DiagnosticsOld[i].ArrivalTypeDoctor.Name @DiagnosticsOld[i].ArrivalTypeDoctor.Surname</td>
+                                        }
+                                    </tr>
+                                    </table>
+                                </div>
+                            }
+                            @foreach (TypeOfDiagnostics typeOfDiagnostics in DiagnosticsOld[i].TypesOfDiagnostics)
+                            {
+                                <div class="me-3">
+                                    <table>
+                                        <tr>
+                                            <td class="fw-bold pb-3">@Localizer["TypeOfDiagnostics"]</td>
+                                            <td class="ps-2 pb-3">@typeOfDiagnostics.ResearchMethod.Name @typeOfDiagnostics.Name @Localizer["Price"] @typeOfDiagnostics.Price</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            }
+                            @if (DiagnosticsOld[i].Discount != null)
+                            {
+                                <div class="me-3">
+                                    <table>
+                                        <tr>
+                                            <td class="fw-bold pb-3">@Localizer["Discount"]</td>
+                                            <td class="ps-2 pb-3">@DiagnosticsOld[i].Discount.Name @Localizer["Persent"] @DiagnosticsOld[i].Discount.Percent</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            }
+                            <div class="me-3">
+                                <table>
+                                    <tr>
+                                        <td class="fw-bold pb-3">@Localizer["StaffDoctor"]</td>
+                                        @if (@DiagnosticsOld[i].Doctor.Patronymic != null)
+                                        {
+                                            <td class="ps-2 pb-3">@DiagnosticsOld[i].Doctor.Name @DiagnosticsOld[i].Doctor.Surname @DiagnosticsOld[i].Doctor.Patronymic</td>
+                                        }   
+                                        else
+                                        {
+                                            <td class="ps-2 pb-3">@DiagnosticsOld[i].Doctor.Name @DiagnosticsOld[i].Doctor.Surname</td>
+                                        }
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="me-3">
+                                <table>
+                                    <tr>
+                                        <td class="fw-bold pb-3">@Localizer["Paid"]</td>
+                                        @if (@DiagnosticsOld[i].BeenPaid == null)
+                                        {
+                                            <td class="ps-2 pb-3">0</td>
+                                        }
+                                        else
+                                        {
+                                            <td class="ps-2 pb-3 @textColot(DiagnosticsOld[i].BeenPaid, DiagnosticsOld[i].TotalCost)">@DiagnosticsOld[i].BeenPaid</td>
+                                        }
+                                    </tr>
+                                </table>
+                            </div>
+                            @if (DiagnosticsOld[i].Debt != 0)
+                            {
+                                <div class="me-3">
+                                    <table>
+                                        <tr>
+                                            <td class="fw-bold pb-3">@Localizer["Debt"]</td>
+                                            <td class="ps-2 pb-3">@DiagnosticsOld[i].Debt</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            }
+                            @if (DiagnosticsOld[i].IsPaidInfull == false)
+                            {
+                                <div class="me-3">
+                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#payment_@i">@Localizer["Payment"]</button>
+                                </div>
+                            }
+                            <div class="modal fade" id="payment_@i" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h1 class="modal-title fs-5" id="exampleModalLabel">@Localizer["PaymentAction"]</h1>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            @await Html.PartialAsync("PartialViews/PaymentPartialView.cshtml", new PaymentViewModel() { DiagnosticId = DiagnosticsOld[i].Id, Debt = DiagnosticsOld[i].Debt, TypeOfCashlessPayment = DiagnosticsOld[i].TypeOfCashlessPayment, TypesOfCashlessPayment = Model.TypesOfCashlessPayment})
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="me-3">
+                                <table>
+                                    <tr>
+                                        <td class="fw-bold pb-3">@Localizer["ImageStatus"]</td>
+                                        <td class="ps-2 pb-3 @StatusResult(DiagnosticsOld[i].ImagesStatus)[1]">@Localizer[DiagnosticsOld[i].ImagesStatus]</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <a class="btn btn-primary" asp-action="DiagnosticsDetails" asp-controller="Patients" asp-route-id="@DiagnosticsOld[i].Id">@Localizer["More"]</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@functions {
+    private List<string> StatusResult(string status)
+    {
+        List<string> result = new List<string>();
+        var textAndColor = "";
+        if (status == "Available")
+            textAndColor = $"{Localizer["Start"].Value} text-primary";
+        else if (status == "InProcess")
+            textAndColor = $"{Localizer["Finish"].Value} text-danger";
+        else
+            textAndColor = $"{Localizer["Reopen"].Value} text-success";
+        result.AddRange(textAndColor.Split(" "));
+        return result;
+    }
+}
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        function delObj (id) {
+        let deleteConfirm = confirm('@Localizer["ConfirmDelete"]');
+        if (deleteConfirm) {
+            window.location.href = '@Url.Action("DeletePatient", "Patients")?id=' + id;
+        }
+    };
+        function NewShow() {
+            let newD = document.getElementById("newD");
+            let oldD = document.getElementById("oldD");
+            if(newD.getAttribute("style") === "display: none"){
+                newD.setAttribute("style","display: d-block");
+                oldD.setAttribute("style","display: none");
+            }
+        }
+        
+        function OldShow() {
+            let newD = document.getElementById("newD");
+            let oldD = document.getElementById("oldD");
+            if(oldD.getAttribute("style") === "display: none"){
+                newD.setAttribute("style","display: none");
+                oldD.setAttribute("style","display: d-block");
+            }
+        }
+    </script>
+}

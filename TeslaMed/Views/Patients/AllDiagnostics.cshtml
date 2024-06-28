@@ -1,0 +1,155 @@
+﻿@using TeslaMed.ViewModels
+@using Microsoft.AspNetCore.Mvc.Localization
+
+@inject IViewLocalizer Localizer
+@model List<Diagnostics>;
+
+@{
+    ViewData["Title"] = Localizer["Title"];
+    List<TypeOfDiagnostics> typesOfDiagnostics = new List<TypeOfDiagnostics>();
+    var textColot = (int? paid, int totalCost) => paid == totalCost ? "text-success" : "text-danger";
+    List<Pre_entry> entries = ViewBag.Entries;
+    string classTableActive = "table-active";
+    string addClass = "";
+}
+<div class="container">
+    <div class="mt-3 mb-3">
+    <form method="get" asp-action="AllDiagnostics" asp-controller="Patients">
+        <div class="row">
+            <div class="col-md-3 d-flex flex-column">
+                <label for="filterLastName">@Localizer["FilterLastName"]:</label>
+                <input type="text" id="filterLastName" name="filterLastName" class="form-control mt-auto align-self-end" />
+            </div>
+            <div class="col-md-3 d-flex flex-column">
+                <label for="filterFirstName">@Localizer["FilterName"]:</label>
+                    <input type="text" id="filterFirstName" name="filterFirstName" class="form-control mt-auto align-self-end" />
+            </div>
+            <div class="col-md-3 d-flex flex-column">
+                <label for="filterDate">@Localizer["FilterDate"]:</label>
+                    <input type="date" id="filterDate" name="filterDate" class="form-control mt-auto align-self-end" />
+            </div>
+            <div class="col-md-3 d-flex flex-column">
+                <label for="filterResearchMethod">@Localizer["FilterType"]:</label>
+                    <select id="filterResearchMethod" name="filterResearchMethod" class="form-control mt-auto align-self-end">
+                    <option value="">@Localizer["AllTypes"]</option>
+                    @foreach (var researchMethod in ViewBag.ResearchMethods)
+                        {
+                            <option value="@researchMethod.Id">@researchMethod.Name</option>
+                        }
+                </select>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-12 d-flex justify-content-center">
+                <button type="submit" class="btn btn-primary">@Localizer["Apply"]</button>
+            </div>
+        </div>
+    </form>
+    </div>
+<div>
+    <div class="me-4 ms-3" >
+        <h4 class="text-center">@Localizer["Header"]</h4>
+        @if (User.IsInRole("x-ray_laboratory_assistant"))
+            {
+                <div class="mb-3">
+                    <a type="button" class="btn btn-primary me-3" asp-action="AllDiagnostics" asp-route-allLaborantDiagnostics="true">@Localizer["ButtonLaborantDiagnostics"]</a>
+                    <a type="button" class="btn btn-primary me-3" asp-action="AllDiagnostics">@Localizer["ButtonAllDiagnostics"]</a>
+                </div>
+            }
+        @if (Model.Count == 0)
+        {
+            <p class="text-center">@Localizer["NullList"]</p>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">№</th>
+                        <th scope="col">@Localizer["Code"]</th>
+                        <th scope="col">@Localizer["Surname"]</th>
+                        <th scope="col">@Localizer["Name"]</th>
+                        <th scope="col">@Localizer["Patronymic"]</th>
+                        <th scope="col">@Localizer["ResearchMethod"]</th>
+                        <th scope="col">@Localizer["BeginningOfResearchTime"]</th>
+                        <th scope="col">@Localizer["EndOfResearchTime"]</th>
+                        <th scope="col">@Localizer["DownloadInfo"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < Model.Count; i++)
+                    {
+                        typesOfDiagnostics = Model[i].TypesOfDiagnostics;
+                            if(i % 2 == 0)
+                            {
+                                addClass = classTableActive;
+                            }
+                            else
+                            {
+                                addClass = "";
+                            }
+
+                            for (int j = 0; j < typesOfDiagnostics.Count; j++)
+                            {
+                                <tr class="@addClass" onclick="window.location.href = '@Url.Action("DiagnosticsDetails", "Patients", new {id = Model[i].Id})'">
+                                    <th>@(i + 1)</th>
+                                    <th>@Model[i].Patient.Code</th>
+                                    <td>@Model[i].Patient.Surname</td>
+                                    <td>@Model[i].Patient.Name</td>
+                                    <td>
+                                        @if (@Model[i].Patient.Patronymic != null)
+                                        {
+                                            @Model[i].Patient.Patronymic
+                                        }
+                                    </td>
+                                    <td>@typesOfDiagnostics[j].ResearchMethod.Name: @typesOfDiagnostics[j].Name</td>
+                                    <td>
+                                        @if (entries.FirstOrDefault(e => e.DiagnosticsId == Model[i].Id && e.TypeOfDiagnosticsId == typesOfDiagnostics[j].Id) != null)
+                                        {
+                                            <p class="mb-0">@entries.FirstOrDefault(e => e.DiagnosticsId == Model[i].Id && e.TypeOfDiagnosticsId == typesOfDiagnostics[j].Id).StartTime.ToShortDateString(),</p>
+                                            <p class="mb-0">@entries.FirstOrDefault(e => e.DiagnosticsId == Model[i].Id && e.TypeOfDiagnosticsId == typesOfDiagnostics[j].Id).StartTime.ToShortTimeString()</p>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (entries.FirstOrDefault(e => e.DiagnosticsId == Model[i].Id && e.TypeOfDiagnosticsId == typesOfDiagnostics[j].Id) != null)
+                                        {
+                                            <p class="mb-0">@entries.FirstOrDefault(e => e.DiagnosticsId == Model[i].Id && e.TypeOfDiagnosticsId == typesOfDiagnostics[j].Id).EndTime.ToShortDateString(),</p>
+                                            <p class="mb-0">@entries.FirstOrDefault(e => e.DiagnosticsId == Model[i].Id && e.TypeOfDiagnosticsId == typesOfDiagnostics[j].Id).EndTime.ToShortTimeString()</p>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a asp-controller="Pdf" asp-action="DownloadInfo" asp-route-diagnosticsId="@Model[i].Id" asp-route-patientId="@Model[i].PatientId" asp-route-rsId="@typesOfDiagnostics[j].ResearchMethodId" class="btn btn-primary">@Localizer["DownloadPDF"]</a>
+                                    </td>
+                                </tr>
+                            }
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>    
+</div>
+
+
+
+@functions {
+    private List<string> StatusResult (string status)
+    {
+        List<string> result = new List<string>();
+        var textAndColor = "";
+        if (status == "Available")
+            textAndColor = $"{Localizer["Start"].Value} text-primary";
+        else if (status == "InProcess")
+            textAndColor = $"{Localizer["Finish"].Value} text-danger";
+        else
+            textAndColor = $"{Localizer["Reopen"].Value} text-success";
+        result.AddRange(textAndColor.Split(" "));
+        return result;
+    }
+}
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

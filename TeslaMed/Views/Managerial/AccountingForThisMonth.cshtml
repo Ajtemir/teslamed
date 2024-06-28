@@ -1,0 +1,54 @@
+﻿@using TeslaMed.ViewModels
+@using Microsoft.AspNetCore.Mvc.Localization
+
+@inject IViewLocalizer Localizer
+@model List<AccountingForThisMonthViewModel>;
+
+@{
+    ViewData["Title"] = Localizer["Title"];
+}
+<div class="container">
+    <a class="btn btn-primary ms-3" asp-action="ShowPayDeskMainPage">@Localizer["ButtonBack"]</a>
+    <div>
+        <div class="me-4 ms-3">
+            <h4 class="text-center">@Localizer["Header"]</h4>
+            <div class="my-4">
+                <span class="border border-dark border-opacity-75 rounded-pill py-2 px-4">@DateTime.Now.ToString("MMMM") @DateTime.Now.Year</span>
+            </div>
+            @if (Model.Count == 0)
+            {
+                <p class="text-center">@Localizer["NullList"]</p>
+            }
+            else
+            {
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">№</th>
+                            <th scope="col">@Localizer["Date"]</th>
+                            <th scope="col">@Localizer["CashIncome"]</th>
+                            <th scope="col">@Localizer["CashlessIncome"]</th>
+                            <th scope="col">@Localizer["TotalIncome"]</th>
+                            <th scope="col">@Localizer["CashExpensesSum"]</th>
+                            <th scope="col">@Localizer["TotalProfitSum"]</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.Count; i++)
+                        {
+                            <tr>
+                                <td>@(i + 1)</td>
+                                <td>@Model[i].date.ToString("d")</td>
+                                <td>@Model[i].CashIncomeSum</td>
+                                <td>@Model[i].CashlessIncomeSum</td>
+                                <td>@Model[i].TotalIncomeSum</td>
+                                <td>@Model[i].CashExpensesSum</td>
+                                <td>@Model[i].TotalProfitSum</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>

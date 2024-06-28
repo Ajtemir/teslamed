@@ -1,0 +1,30 @@
+﻿@using TeslaMed.ViewModels
+@model PatientsAndEntriesViewModel
+
+@if (Model.Entries.Count > 0)
+{
+    <h5>Список предварительных записей выбранного врача записей на выбранную дату:</h5>
+    <ul>
+        @foreach (var appointment in Model.Entries)
+        {
+            <li>@appointment.StartTime.ToString("HH:mm") - @appointment.EndTime.ToString("HH:mm") <b><span class="text-success">@GetPatientFullName(appointment.PatientId)</span></b></li>
+        }
+    </ul>
+}
+else
+{
+    <p>На выбранную дату нет записей</p>
+}
+
+@functions {
+    
+    string GetPatientFullName(int patientId)
+    {
+        var patient = Model.Patients.FirstOrDefault(p => p.Id == patientId);
+        if (patient != null)
+        {
+            return $"{patient.Name} {patient.Surname}";
+        }
+        return "Неизвестный пациент";
+    }
+}

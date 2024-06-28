@@ -1,0 +1,246 @@
+﻿@using TeslaMed.ViewModels
+@using Microsoft.AspNetCore.Mvc.Localization
+
+@inject IViewLocalizer Localizer
+@model List<Diagnostics>;
+
+@{
+    ViewData["Title"] = Localizer["Title"];
+}
+<div class="container">
+    <div class="mt-3 mb-3">
+    <form method="get" asp-action="OperationalProcess">
+        <div class="row">
+            <div class="col-md-3">
+                <label for="firstDate">@Localizer["FirstDate"]:</label>
+                <input type="date" name="firstDate" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <label for="secondDate">@Localizer["SecondDate"]:</label>
+                <input type="date" name="secondDate" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <label for="patientInfo">@Localizer["PatientInfo"]:</label>
+                <input type="text" name="patientInfo" class="form-control" placeholder="@Localizer["PatientInfoOrder"]"/>
+            </div>
+            <div class="col-md-3">
+                <label for="research">@Localizer["Research"]:</label>
+                <select name="research" class="form-control">
+                    <option value="">@Localizer["AllTypes"]</option>
+                    @foreach (var researchMethod in ViewBag.ResearchMethods)
+                    {
+                        <option value="@researchMethod.Id">@researchMethod.Name</option>
+                    }
+                </select>
+            </div>            
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-12 d-flex justify-content-center">
+                <button type="submit" class="btn btn-primary">@Localizer["Apply"]</button>
+            </div>
+        </div>
+    </form>
+    </div>
+    <div>
+        <div class="me-4 ms-3" >
+            <h4 class="text-center">@Localizer["Header"]</h4>
+            @if (Model.Count == 0)
+            {
+                <p class="text-center">@Localizer["NullList"]</p>
+            }
+            else
+            {
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">№</th>
+                            <th scope="col">@Localizer["Code"]</th>
+                            <th scope="col">@Localizer["Surname"]</th>
+                            <th scope="col">@Localizer["Name"]</th>
+                            <th scope="col">@Localizer["Patronymic"]</th>
+                            <th scope="col">@Localizer["ResearchMethod"]</th>
+                            <th scope="col">@Localizer["BeginningOfResearchTime"]</th>
+                            <th scope="col">@Localizer["EndOfResearchTime"]</th>
+                            <th scope="col">@Localizer["ImageStatus"]</th>
+                            <th scope="col">@Localizer["Comments"]</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.Count; i++)
+                        {
+                            <tr val="@Model[i].Id">                            
+                                <td>@(i + 1)</td>
+                                <td>@Model[i].Patient.Code</td>
+                                <td>@Model[i].Patient.Surname</td>
+                                <td>@Model[i].Patient.Name</td>
+                                <td>@Model[i].Patient.Patronymic</td>
+                                <td>@Model[i].TypesOfDiagnostics.FirstOrDefault().ResearchMethod.Name: @Model[i].TypesOfDiagnostics.Count() @Localizer["Type"]</td>
+                                <td>
+                                    @if (Model[i].ImagesStatus != "Available")
+                                    {
+                                        @Model[i].DiagnosticLog.LogList.LastOrDefault(l => l.Split(" ")[2] == "StartAction").Split(" StartAction ")[0]
+                                    }
+                                </td>
+                                <td>
+                                    @if (Model[i].ImagesStatus == "Completed")
+                                    {
+                                        @Model[i].DiagnosticLog.LogList.LastOrDefault(l => l.Split(" ")[2] == "FinishAction").Split(" FinishAction ")[0]
+                                    }
+                                </td>     
+                                <td class="@StatusResult(Model[i].ImagesStatus)">@Localizer[$"{Model[i].ImagesStatus}"]</td>
+                                <td class="commentCol">
+                                    <button id="modalOpen" onclick="commentsOpen(@Model[i].Id)" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#comments">@Localizer["Comments"]</button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>    
+</div>
+<div id="comments" class="modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@Localizer["Comments"]</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body"></div>
+            <div class="btn-group mx-1 mt-3">
+                <button class="btn btn-outline-primary" onclick="commentsScrollUp()">@Localizer["CommentsUp"]</button>
+                <button class="btn btn-outline-primary" onclick="commentsScrollDown()">@Localizer["CommentsDown"]</button>                
+            </div>
+            <form asp-controller="Comments" asp-action="Create">
+                <input id="diagId" type="number" hidden/>
+                <div class="form-floating mx-1 mb-1">
+                  <textarea id="commentText" class="form-control" placeholder="@Localizer["CommentArea"]" onkeyup="commentInputCheck()" style="height: 100px"></textarea>
+                  <label for="floatingTextarea">@Localizer["CommentAreaLabel"]</label>
+                  <span id="commentError" class="text-danger"></span>
+                </div>                
+            </form>            
+            <div class="modal-footer">     
+                <div class="me-auto">
+                    <input type="checkbox" id="autoUpdate" value="false" onclick="update()"/>
+                    <label for="autoUpdate">@Localizer["AutoUpdate"]</label>
+                </div>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Localizer["CloseModal"]</button>
+                <button id="commentSend" type="button" class="btn btn-primary" onclick="formSubmit()">@Localizer["CommentSend"]</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@functions {
+    private string StatusResult(string status)
+    {
+        var textStyle = "";
+        if (status == "Available")
+            textStyle = "text-primary";
+        else if (status == "InProcess")
+            textStyle = "text-danger";
+        else
+            textStyle = "text-success";
+        return textStyle;
+    }
+}
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>     
+        if ('@User.Identity.IsAuthenticated' == 'False') {
+            console.log('@User.Identity.IsAuthenticated');
+            $('#commentSend').attr("disabled", true);
+            $('#commentText').attr("disabled", true);
+        };
+
+        $('tr > td:not(.commentCol)').on('click', function() {
+            let parent = $(this).parent();
+            let id = parent.attr('val');
+            window.location.href = '@Url.Action("DiagnosticsDetails", "Patients")?id=' + id;
+        });
+
+        function commentsScrollDown () {
+            $('.modal-body').scrollTop(5000);
+        };
+
+        function commentsScrollUp () {
+            $('.modal-body').scrollTop(-5000);
+        };
+        
+        function commentsOpen (x) {         
+            $('.modal-body').load('@Url.Action("CommentsList","Comments")?id=' + x);
+            $('#diagId').val(x);
+            clearInterval(interval);
+            $('#autoUpdate').prop('checked',false);
+            $('#autoUpdate').val('false');
+        };
+
+        let commentMaxLength = 500;
+        function commentInputCheck() {
+            if ($('#commentText').val().length > commentMaxLength) {
+                $('#commentError').text('@Localizer["CommentTooBig"]');
+                return false;
+            } else {
+                $('#commentError').text('');
+                return true;
+            }
+        };
+
+        function formSubmit() {
+            let autoUpdateValue = $('#autoUpdate').val();
+            if ($('#commentText').val() === '') {
+                $('#commentError').text('@Localizer["CommentEmpty"]');
+            } else if (commentInputCheck() === true) {
+                $.ajax({
+                    url: '@Url.Action("Create", "Comments")',
+                    type: 'POST',
+                    data: { 'diagId': $('#diagId').val(), 'commentText' : $('#commentText').val() },
+                    success: function (result) {
+                        if (result === 200) {
+                            $('.modal-body').load('@Url.Action("CommentsList","Comments")?id=' + $('#diagId').val());
+                            $('#commentText').val('');
+                            if (autoUpdateValue === 'true') {
+                                $('#autoUpdate').prop('checked',true);
+                                $('#autoUpdate').val(autoUpdateValue);
+                            }
+                            setTimeout(function () {
+                                $('.modal-body').scrollTop(5000);
+                            }, 500);
+                        }
+                    },
+                });
+            }
+        };
+
+        let interval;
+        let updateTime = 3000;
+        function commentUpdate (x) {
+            clearInterval(interval);
+            interval = setInterval(function () {
+                console.log('OK');
+                if ($('#comments').css('display') == 'none')
+                    clearInterval(interval);
+                else {
+                    $('.modal-body').load('@Url.Action("CommentsList","Comments")?id=' + x);                
+                    setTimeout(function () {
+                        $('.modal-body').scrollTop(5000);
+                    }, 500);
+                }
+                }, updateTime);
+        };
+
+        function update() {
+            if ($('#autoUpdate').val() === 'false') {
+                commentUpdate($('#diagId').val());
+                $('#autoUpdate').val('true');
+            } else {
+                clearInterval(interval);
+                $('#autoUpdate').val('false')
+            }
+        };
+    </script>
+}

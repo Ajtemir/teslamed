@@ -1,0 +1,43 @@
+﻿﻿@using TeslaMed.ViewModels
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@model ReportViewModel
+<div>
+    <div class="py-0">
+        <form asp-controller="Patients" asp-action="RatePhoto" id="formRatePhoto_@Model.TypeOfDiagnosticId">
+            <div>
+                <input asp-for="DiagnosticId" value="@Model.DiagnosticId" hidden />
+                <input asp-for="TypeOfDiagnosticId" value="@Model.TypeOfDiagnosticId" hidden />
+            </div>
+            <div>
+                <label asp-for="Rating" class="form-label">@Localizer["RatingLabel"]</label>
+                <select asp-for="Rating" class="form-select" id="rating">
+                    <option value="" hidden>@Localizer["ChooseRating"]</option>
+                    <option value="5">@Localizer["RatingHigh"]</option>
+                    <option value="4">@Localizer["RatingGood"]</option>
+                    <option value="3">@Localizer["RatingMiddle"]</option>
+                    <option value="2">@Localizer["RatingLow"]</option>
+                    <option value="1">@Localizer["RatingBad"]</option>
+                </select>
+                <span class="text-danger" id="ratingError_@Model.TypeOfDiagnosticId"></span>
+            </div>
+            <div class="mt-2">
+                <button type="button" onclick="isRatingNull(@Model.TypeOfDiagnosticId)" class="btn btn-primary">@Localizer["RatingButton"]</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<script>
+    function isRatingNull(x) {
+        let ratingOptionVal = $("#rating option:selected").val();
+        if (ratingOptionVal === '') {
+            $('#ratingError_' + x).text('@Localizer["RatingNullError"]');
+        }
+        else {
+            $('#ratingError_' + x).text('');
+            $('#formRatePhoto_' + x).submit();
+        }
+    }
+</script>

@@ -1,0 +1,65 @@
+﻿html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+    .mobile-only {
+        display: none;
+    }
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+.error {
+    border-color: red;
+    background-color: #ffe6e6;
+}
+@media screen and (max-width: 768px) {
+    .mobile-only {
+        display: block;
+    }
+
+    .headerList {
+        display: none;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        font-size: 1.5em;
+    }
+        .carousel-control-prev,
+        .carousel-control-next {
+            font-size: 0.3rem; 
+        }
+}
+
+.dropMain li a {
+    padding-left: 20px !important;
+    display: flex;
+    align-items: center;
+}
+
+.dropMain img {
+    max-width: 30px !important;
+}
+
+.dropMain li a img {
+    margin-right: 10px !important;
+}
+
+.dropMain li a p {
+    font-weight: bold !important;
+}
+.dropMain{
+    min-width: auto !important;
+    width: max-content !important;
+    white-space: nowrap;
+}

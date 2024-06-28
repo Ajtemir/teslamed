@@ -1,0 +1,12 @@
+@model TeslaMed.Models.Pre_entry
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+<h2>@Localizer["Confirm"]</h2>
+
+<p>@Localizer["DoubleConfirm"] @ViewBag.Patient.Name @ViewBag.Patient.Surname на @Model.StartTime.ToString("dd.MM.yyyy HH:mm")?</p>
+
+<form method="post" asp-action="DeleteEntry" asp-route-id="@Model.Id">
+    <button type="submit" class="btn btn-danger">@Localizer["Delete"]</button>
+    <a asp-action="ShowEntries" asp-controller="Doctors" asp-route-id="@Model.DoctorId" class="btn btn-secondary">@Localizer["Cancel"]</a>
+</form>

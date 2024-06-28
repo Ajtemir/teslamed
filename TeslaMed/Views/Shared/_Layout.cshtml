@@ -1,0 +1,296 @@
+﻿@using Microsoft.AspNetCore.Localization;
+@using Microsoft.AspNetCore.Mvc.Localization
+
+@inject IViewLocalizer Localizer
+
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var returnUrl = string.IsNullOrEmpty(Context.Request.Path) ? "~/" : $"~{Context.Request.Path.Value}";
+}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - TeslaMed</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/TeslaMed.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
+    <link rel="icon" type="image/png" href="~/images/icon.png">
+</head>
+<body class="mb-0">
+
+    <header style="background-color:#0161AB; height: 110px;">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light">
+            <div class="container-fluid">
+                <a asp-action="MainPage" asp-controller="News">
+                    <img src="~/images/Logo_TESLAMED2.png" alt="teslamedLogo" style="width: 200px;" />
+                </a>
+                <div class="dropdown mobile-only">
+                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
+                       <img src="~/images/menu.svg" style="height: 30px;" />
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-dark dropMain" aria-labelledby="dropdownMenuButton2" style="background-color: #0161AB; top: 0; left: auto; right: 100%;">
+                        <li>
+                            <a asp-controller="News" asp-action="Index" class="text-decoration-none text-white">
+                        @Localizer["MainPage"]<img src="~/images/news.svg" alt="main" class="w-100 ms-1" style="max-width: 20px" />
+                        </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a asp-controller="Patients" asp-action="Create" class="text-decoration-none text-white" >
+                                @Localizer["Register"]
+                        <img src="~/images/plus-circle.svg" alt="registration" class="w-100 ms-1" style="max-width: 20px" />
+                    </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="text-decoration-none text-white"  asp-area="" asp-controller="OperatingActivities" asp-action="ShowOperatingActivitiesMainPage">
+                                @Localizer["OperatingActivities"]<img src="~/images/diagram-2.svg" alt="operationalActivities" class="ms-1 w-100" style="max-width: 20px" />
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a asp-controller="Patients" asp-action="Index" class="text-decoration-none text-white" >
+                        @Localizer["Patients"]<img src="~/images/group-people.svg" alt="patients" class="w-100 ms-1" style="max-width: 20px" />
+                    </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="text-decoration-none text-white"  asp-controller="Patients" asp-action="AllDiagnostics" asp-route-filterDate="@DateTime.Now.ToString("MM.dd.yyyy")">
+                                 @Localizer["Appeals"]<img src="~/images/clipboard-with-text.svg" alt="diagnostics" class="ms-1 w-100" style="max-width: 20px" />
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a asp-controller="Doctors" asp-action="AllEntries" class="text-decoration-none text-white">
+                        @Localizer["PreEntry"]<img src="~/images/calendar-time.svg" alt="appointment" class="ms-1 w-100" style="max-width: 20px" />
+                    </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        @if (User.IsInRole("manager") || User.IsInRole("admin") || User.IsInRole("registrar"))
+                {
+                    <li>
+                        <a asp-controller="Doctors" asp-action="ShowListOfDoctors" class="text-decoration-none text-white">
+                            @Localizer["Doctors"]<img src="~/images/doctor.svg" alt="doctors" class="ms-1 w-100" style="max-width: 20px" />
+                        </a>
+                    </li>
+                }
+                        <li><hr class="dropdown-divider"></li>
+                        @if (User.IsInRole("admin") || User.IsInRole("registrar"))
+                {
+                    <li>
+                        <a asp-controller="Report" asp-action="ShowReportMainPage" class="text-decoration-none text-white">
+                            @Localizer["Reports"]<img src="~/images/linkage-diagram.svg" alt="reports" class="ms-1 w-100" style="max-width: 20px" />
+                        </a>
+                    </li>
+                }
+                        <li><hr class="dropdown-divider"></li>
+                        @if (User.IsInRole("admin") || User.IsInRole("registrar") || User.IsInRole("manager") || User.IsInRole("x-ray_laboratory_assistant"))
+                {
+                    <li>
+                        <a asp-controller="Inventory" asp-action="ShowInventoryMainPage" class="text-decoration-none text-white">
+                            @Localizer["Inventory"]<img src="~/images/storehouse-management.svg" alt="inventory" class="ms-1 w-100" style="max-width: 20px" />
+                        </a>
+                    </li>
+                }
+                        <li><hr class="dropdown-divider"></li>
+                        @if (User.IsInRole("admin"))
+                {
+                    <li>
+                        <a asp-controller="Managerial" asp-action="ShowManagerialMainPage" class="text-decoration-none text-white">
+                            @Localizer["ManagerialAccounting"]<img src="~/images/leader.svg" alt="management" class="ms-1 w-100" style="max-width: 20px" />
+                        </a>
+                    </li>
+                }
+                        <li><hr class="dropdown-divider"></li>
+                        @if (User.IsInRole("manager") || User.IsInRole("admin"))
+                {
+                    <li>
+                        <a asp-controller="Account" asp-action="SettingsTeslaMed" class="text-decoration-none text-white">
+                            @Localizer["Settings"]<img src="~/images/settings.svg" alt="settings" class="ms-1 w-100" style="max-width: 20px" />
+                        </a>
+                    </li>
+                }
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    @if (requestCulture.RequestCulture.UICulture.Name == "ru")
+                    {
+                        <a class="text-decoration-none text-white" asp-area="" asp-action="SetLanguage" asp-controller="Account" asp-route-culture="ky" asp-route-returnUrl="@returnUrl">
+                            Текущий язык <img class="ms-1 w-100" src="~/images/flagRU.svg" alt="flagRU" style="max-width: 30px;" />
+                        </a>
+                    }
+                    @if (requestCulture.RequestCulture.UICulture.Name == "ky")
+                    {
+                        <a class="text-decoration-none text-white" asp-area="" asp-action="SetLanguage" asp-controller="Account" asp-route-culture="ru" asp-route-returnUrl="@returnUrl">
+                            Текущий язык <img class="ms-1 w-100" src="~/images/flagKG.svg" alt="flagKG" style="max-width: 30px;" />
+                        </a>
+                    }
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li style="padding-left: 20px;">
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <form method="post" asp-controller="Account" asp-action="LogOff">
+                        <button type="submit" class="text-decoration-none border-0 bg-transparent text-white">
+                            @Localizer["LogOff"]
+                            <img src="~/images/logout.svg" alt="settings" class="w-100 ms-1" style="max-width: 30px" />
+                        </button>
+                    </form>
+
+                }
+                else
+                {
+                    <a class="text-decoration-none text-white" asp-controller="Account" asp-action="Login">
+                        <p>@Localizer["Login"]</p>
+                    </a>
+                }
+                </li>
+                    </ul>
+                </div>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between headerList">                    
+                    <button class="btn me-5 py-3" title=@Localizer["CollapsButton"] onclick="hideShow()" style="background-color:#0161AB;"><img src="~/images/menu.svg" style="height: 30px;" /></button>
+                    <ul class="navbar-nav flex-grow-1 py-3 headerList">
+                        <li class="nav-item">
+                            <a class="navbar-brand pt-0" asp-area="" asp-controller="OperatingActivities" asp-action="ShowOperatingActivitiesMainPage" title=@Localizer["OperatingActivities"]>
+                                <img src="~/images/diagram-2.svg" alt="operationalActivities" class="w-100" style="max-width: 50px" />
+                            </a>
+                        </li>
+                    </ul>
+                    <ul class="navbar-nav justify-content-end headerList">
+                        <li class="nav-item py-3">
+                            @if (requestCulture.RequestCulture.UICulture.Name == "ru")
+                            {
+                                <a class="navbar-brand d-flex pt-0" asp-area="" asp-action="SetLanguage" asp-controller="Account" asp-route-culture="ky" asp-route-returnUrl="@returnUrl">
+                                    <img src="~/images/flagRU.svg" alt="flagRU" style="max-width: 50px;" /><p class="mb-0 fw-bold fs-5 ps-1 text-light">RU</p>
+                                </a>
+                            }
+                            @if (requestCulture.RequestCulture.UICulture.Name == "ky")
+                            {
+                                <a class="navbar-brand d-flex pt-0" asp-area="" asp-action="SetLanguage" asp-controller="Account" asp-route-culture="ru" asp-route-returnUrl="@returnUrl">
+                                    <img src="~/images/flagKG.svg" alt="flagKG" style="max-width: 50px;" /><p class="mb-0 fw-bold fs-5 ps-1 text-light">KG</p>
+                                </a>
+                            }
+                        </li>
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item py-3 ms-3">
+                                <p class="text-decoration-none text-white fw-bold fs-5">@User.Identity.Name</p>
+                            </li>
+
+                            <li class="nav-item py-3 ms-3">
+                                <form method="post" asp-controller="Account" asp-action="LogOff">
+                                    <input class="text-end border border-0 bg-transparent text-white fw-bold fs-5" type="submit" value="@Localizer["LogOff"]" />
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item py-3">
+                                <a class="nav-link d-flex pt-0" asp-controller="Account" asp-action="Login">
+                                    <p class="text-decoration-none text-white fw-bold">@Localizer["Login"]</p>
+                                </a>
+                            </li>
+                        }
+                    </ul>                    
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="d-flex headerList" style="min-height: calc(100vh - 110px);">
+        <div id="navCol" class="col-1 headerList custom-nav" style="max-width: 100px; min-width: 60px">
+            <div style="background-color:#0161AB;" class="text-center h-100">
+                		<div class="pt-5 pb-3">
+                    <a asp-controller="News" asp-action="Index" title=@Localizer["MainPage"]>
+                        <img src="~/images/news.svg" alt="main" class="w-100" style="max-width: 50px" />
+                    </a>
+                </div>
+                <div class="py-3">
+                    <a asp-controller="Patients" asp-action="Create" title=@Localizer["Register"]>
+                        <img src="~/images/plus-circle.svg" alt="registration" class="w-100" style="max-width: 50px" />
+                    </a>
+                </div>
+                <div class="py-3">
+                    <a asp-controller="Patients" asp-action="Index" title=@Localizer["Patients"]>
+                        <img src="~/images/group-people.svg" alt="patients" class="w-100" style="max-width: 50px" />
+                    </a>
+                </div>
+                
+                <div class="py-3">
+                    <a asp-controller="Patients" asp-action="AllDiagnostics" asp-route-filterDate="@DateTime.Now.ToString("MM.dd.yyyy")" title=@Localizer["Appeals"]>
+                        <img src="~/images/clipboard-with-text.svg" alt="diagnostics" class="w-100" style="max-width: 50px" />
+                    </a>
+                </div>
+                <div class="py-3">
+                    <a asp-controller="Doctors" asp-action="AllEntries" title=@Localizer["PreEntry"]>
+                        <img src="~/images/calendar-time.svg" alt="appointment" class="w-100" style="max-width: 50px" />
+                    </a>
+                </div>
+          
+                @if (User.IsInRole("manager") || User.IsInRole("admin") || User.IsInRole("registrar"))
+                {
+                    <div class="py-3">
+                        <a asp-controller="Doctors" asp-action="ShowListOfDoctors" title=@Localizer["Doctors"]>
+                            <img src="~/images/doctor.svg" alt="doctors" class="w-100" style="max-width: 50px" />
+                        </a>
+                    </div>
+                }
+                @if (User.IsInRole("admin") || User.IsInRole("registrar"))
+                {
+                    <div class="py-3">
+                        <a asp-controller="Report" asp-action="ShowReportMainPage" title=@Localizer["Reports"]>
+                            <img src="~/images/linkage-diagram.svg" alt="reports" class="w-100" style="max-width: 50px" />
+                        </a>
+                    </div>
+                }
+                @if (User.IsInRole("admin") || User.IsInRole("registrar") || User.IsInRole("manager") || User.IsInRole("x-ray_laboratory_assistant"))
+                {
+                    <div class="py-3">
+                        <a asp-controller="Inventory" asp-action="ShowInventoryMainPage" title=@Localizer["Inventory"]>
+                            <img src="~/images/storehouse-management.svg" alt="inventory" class="w-100" style="max-width: 50px" />
+                        </a>
+                    </div>
+                }
+                @if (User.IsInRole("admin"))
+                {
+                    <div class="py-3">
+                        <a asp-controller="Managerial" asp-action="ShowManagerialMainPage" title=@Localizer["ManagerialAccounting"]>
+                            <img src="~/images/leader.svg" alt="management" class="w-100" style="max-width: 50px" />
+                        </a>
+                    </div>
+                }
+                @if (User.IsInRole("manager") || User.IsInRole("admin"))
+                {
+                    <div class="py-3">
+                        <a asp-controller="Account" asp-action="SettingsTeslaMed" title=@Localizer["Settings"]>
+                            <img src="~/images/settings.svg" alt="settings" class="w-100" style="max-width: 50px" />
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="w-100 main-content">
+            <main role="main" class="pb-3 ps-3 pt-2">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <footer>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        function hideShow(){
+            if ($('#navCol').css('display') == 'none')
+                $('#navCol').show();
+            else
+                $('#navCol').hide();
+        }
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

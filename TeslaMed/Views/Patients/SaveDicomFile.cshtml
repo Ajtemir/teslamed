@@ -1,0 +1,39 @@
+﻿@model TeslaMed.ViewModels.DicomFilesSaveViewModel;
+@using Microsoft.AspNetCore.Mvc.Localization
+
+@inject IViewLocalizer Localizer
+@{
+    ViewData["Title"] = Localizer["Title"];
+}
+
+<div class="d-flex justify-content-center">
+    <div class="row ms-3">
+        <h4 class="text-center">@Localizer["Header"]</h4>
+        <div class="col-auto">
+            <form asp-action="SaveDicomFile"  asp-controller="Patients" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label asp-for="TypeOfDiagnostics" class="control-label">@($"{Model.TypeOfDiagnostics.ResearchMethod.Name} {Model.TypeOfDiagnostics.Name}")</label>
+                    <input asp-for="TypeOfDiagnosticsId" hidden class="form-control"  value="@Model.TypeOfDiagnosticsId"/>
+                    <input asp-for="DiagnosticId" hidden value="@Model.DiagnosticId" />
+                </div>
+                <div class="form-group">
+                    <label asp-for="DicomFiles" class="control-label">@Localizer["SelectDicomFile"]</label>
+                    <input asp-for="DicomFiles" type="file" class="form-control" />
+                    <span asp-validation-for="DicomFiles" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <input type="submit" value="@Localizer["Download"]" class="btn btn-primary mt-3" />
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

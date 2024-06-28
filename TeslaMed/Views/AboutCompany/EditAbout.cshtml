@@ -1,0 +1,69 @@
+﻿@using Microsoft.AspNetCore.Localization;
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@model TeslaMed.Models.AboutCompany
+
+@{
+    ViewData["Title"] = "Edit About";
+}
+
+<div class="container text-center align-items-center">
+    <h1 style="color:#0161AB">@Localizer["EditAbout"]</h1>
+
+    <form asp-action="EditAbout" method="post" enctype="multipart/form-data" style="max-width: 60%; margin: 0 auto;">
+        <input type="hidden" asp-for="Id" />
+
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div class="form-group mb-3">
+            <label asp-for="Text" class="control-label"></label>
+            <textarea asp-for="Text" class="form-control"></textarea>
+            <span asp-validation-for="Text" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-4 mx-auto">
+                <img src="@Model.Image" id="imagePreview" class="card-img-top">
+                <div class="form-group mt-4">
+                    <label asp-for="Image" class="control-label"></label>
+                    <input type="hidden" id="ImageChanged" name="ImageChanged" value="false" />
+                    <input type="hidden" asp-for="Image" id="Image" />
+                    <input type="file" asp-for="Image" name="newImage" id="newImage" class="form-control" accept=".jpg, .jpeg, .png" />
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group mt-3 text-center">
+            <input type="submit" value="@Localizer["Save"]" class="btn btn-primary" />
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const newImageInput = document.getElementById("newImage");
+            const imagePreview = document.getElementById("imagePreview");
+            const imageField = document.getElementById("Image");
+            const imageChangedField = document.getElementById("ImageChanged");
+
+            newImageInput.addEventListener("change", function () {
+                const file = newImageInput.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        imagePreview.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                    imageChangedField.value = "true";
+                } else {
+                    imagePreview.src = imageField.value;
+                    imageChangedField.value = "false";
+                }
+            });
+        });
+    </script>
+}

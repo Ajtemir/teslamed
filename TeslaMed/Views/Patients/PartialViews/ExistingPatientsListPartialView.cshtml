@@ -1,0 +1,10 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@model List<Patient>;
+
+@foreach (var p in Model)
+{
+    <a asp-action="Details" asp-route-id="@p.Id">
+        <p>@p.Name @p.Surname @p.Patronymic @p.BirthDate.ToShortDateString()</p>
+    </a>
+}

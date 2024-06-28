@@ -1,0 +1,145 @@
+@model TeslaMed.ViewModels.EditEntryViewModel
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+<div class="container">
+    <h2 class="text-center">@Localizer["Header"]</h2>
+    <div class="mt-3 mb-3">
+        <a class="btn btn-primary" asp-action="Index" asp-controller="Patients">@Localizer["ButtonBack"]</a>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <form method="post" asp-action="EditEntry" asp-controller="Doctors">
+                <input asp-for="EntryId" value="@Model.EntryId" hidden />
+                <input type="hidden" asp-for="DiagnosticsId" value="@Model.DiagnosticsId" />
+                <input type="hidden" asp-for="SelectedPatientId" value="@Model.SelectedPatientId" />
+                <input type="hidden" asp-for="DoctorId" value="@Model.DoctorId" />
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label>@Localizer["Doctor"]</label>
+                    <input readonly class="form-control" value="@ViewBag.Diagnostics.Doctor.Name @ViewBag.Diagnostics.Doctor.Surname" />
+                </div>
+                <div class="form-group">
+                    <label>@Localizer["Patient"]</label>
+                    <input readonly class="form-control" value="@ViewBag.Diagnostics.Patient.Name @ViewBag.Diagnostics.Patient.Surname" />
+                </div>
+                <div class="form-group">
+                    <label>@Localizer["Date"]</label>
+                    <input asp-for="Date" type="date" class="form-control" value="@Model.Date.ToString("yyyy-MM-dd")" />
+                    <span asp-validation-for="Date" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label>@Localizer["Time"]</label>
+                    <div class="row">
+                        <div class="col-6">
+                            <label>@Localizer["From"]</label>
+                            <div class="input-group">
+                                <input asp-for="SelectedStartHour" class="form-control" style="max-width: 70px;" value="@Model.SelectedStartHour" />
+                                <span class="input-group-text">:</span>
+                                <select asp-for="SelectedStartMinute" class="form-control" style="max-width: 50px;">
+                                    @if (Model.SelectedStartMinute == 0)
+                                    {
+                                        <option selected value="0">00</option>
+                                        <option value="30">30</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="0">00</option>
+                                        <option selected value="30">30</option>
+                                    }
+                                </select>
+                            </div>
+                            <span asp-validation-for="SelectedStartHour" class="text-danger"></span>
+                            <span asp-validation-for="SelectedStartMinute" class="text-danger"></span>
+                        </div>
+                        <div class="col-6">
+                            <label>@Localizer["Till"]</label>
+                            <div class="input-group">
+                                <input asp-for="SelectedEndHour" class="form-control" style="max-width: 70px;" value="@Model.SelectedEndHour" />
+                                <span class="input-group-text">:</span>
+                                <select asp-for="SelectedEndMinute" class="form-control" style="max-width: 50px;">
+                                    @if (Model.SelectedEndMinute == 0)
+                                    {
+                                        <option selected value="0">00</option>
+                                        <option value="30">30</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="0">00</option>
+                                        <option selected value="30">30</option>
+                                    }
+                                </select>
+                            </div>
+                            <span asp-validation-for="SelectedEndHour" class="text-danger"></span>
+                            <span asp-validation-for="SelectedEndMinute" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>@Localizer["TypeOfDiagnostics"]</label>
+                    <select asp-for="SelectedTypeOfDiagnosticsId" class="form-control">
+                        <option hidden value="@Model.SelectedTypeOfDiagnosticsId">
+                            @foreach (var researchMethod in ViewBag.ResearchMethods)
+                            {
+                                @if (researchMethod.Id == ViewBag.Type.ResearchMethodId)
+                                {
+                                    @researchMethod.Name
+                                    break;
+                                }
+                            }
+                            - @ViewBag.Type.Name
+                        </option>
+                        @foreach (var diagnosticType in Model.TypesOfDiagnostics)
+                        {
+                            <option value="@diagnosticType.Id">
+                                @foreach (var researchMethod in ViewBag.ResearchMethods)
+                                {
+                                    @if (researchMethod.Id == diagnosticType.ResearchMethodId)
+                                    {
+                                        @researchMethod.Name
+                                        break;
+                                    }
+                                }
+                                - @diagnosticType.Name
+                            </option>
+                        }
+                    </select>
+                    <span asp-validation-for="SelectedTypeOfDiagnosticsId" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary mt-3">@Localizer["Save"]</button>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <div id="appointmentsList" class="mt-3">
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function () {
+            $('#Date').change(function () {
+                var selectedDate = $(this).val();
+                var doctorId = @Model.DoctorId;
+                $.ajax({
+                    url: '/Doctors/AppointmentsList',
+                    type: 'GET',
+                    data: {
+                        doctorId: doctorId,
+                        selectedDate: selectedDate
+                    },
+                    success: function (data) {
+                        $('#appointmentsList').html(data);
+                    }
+                });
+            });
+
+            $('#Date').trigger('change');
+        });
+    </script>
+    }

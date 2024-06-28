@@ -1,0 +1,38 @@
+@using Microsoft.AspNetCore.Mvc.Localization
+
+@inject IViewLocalizer Localizer
+@model IEnumerable<TeslaMed.Models.User>
+@{
+    ViewData["Title"] = @Localizer["Title"];
+}
+
+<div class="container">
+    <h2 class="text-center">@Localizer["Title"]</h2>
+    <div>
+        <ul class="list-group list-group-flush">
+            @if (User.IsInRole("admin"))
+            {
+                <li class="list-group-item list-group-item-action"><a asp-action="Index" asp-controller="ResearchMethods" class="text-decoration-none text-dark">@Localizer["ResearchMethods"]</a></li>
+                <li class="list-group-item list-group-item-action"><a asp-action="Index" asp-controller="TypeOfDiagnostics" class="text-decoration-none text-dark">@Localizer["TypeOfDiagnostics"]</a></li>
+                <li class="list-group-item list-group-item-action"><a asp-action="Index" asp-controller="TypesOfCashlessPayment" class="text-decoration-none text-dark">@Localizer["TypesOfCashlessPayment"]</a></li>
+            }
+            @if (User.IsInRole("manager") || User.IsInRole("admin"))
+            {
+                <li class="list-group-item list-group-item-action"><a asp-action="Index" asp-controller="Doctors" class="text-decoration-none text-dark">@Localizer["Doctors"]</a></li>
+                <li class="list-group-item list-group-item-action"><a asp-action="Index" asp-controller="PlaceOfWorks" class="text-decoration-none text-dark">@Localizer["PlaceOfWorks"]</a></li>
+            }
+            @if (User.IsInRole("admin"))
+            {
+                <li class="list-group-item list-group-item-action"><a asp-action="Index" asp-controller="JobTitles" class="text-decoration-none text-dark">@Localizer["JobTitles"]</a></li>
+                <li class="list-group-item list-group-item-action"><a asp-action="Index" asp-controller="Discounts" class="text-decoration-none text-dark">@Localizer["Discounts"]</a></li>
+                <li class="list-group-item list-group-item-action"><a asp-action="Index" asp-controller="Departments" class="text-decoration-none text-dark">@Localizer["Departments"]</a></li>
+                <li class="list-group-item list-group-item-action"><a asp-action="Index" asp-controller="ArrivalTypes" class="text-decoration-none text-dark">@Localizer["ArrivalTypes"]</a></li>
+                <li class="list-group-item list-group-item-action"><a asp-action="Index" asp-controller="Specializations" class="text-decoration-none text-dark">@Localizer["Specializations"]</a></li>
+                <li class="list-group-item list-group-item-action"><a asp-action="Index" asp-controller="Account" class="text-decoration-none text-dark">@Localizer["Account"]</a></li>
+                <li class="list-group-item list-group-item-action"><a asp-action="Index" asp-controller="InventoryNames" class="text-decoration-none text-dark">@Localizer["MaterialValueName"]</a></li>
+                <li class="list-group-item list-group-item-action"><a asp-action="Index" asp-controller="OperatingCostNames" class="text-decoration-none text-dark">@Localizer["OperatingCostName"]</a></li>
+                <li class="list-group-item list-group-item-action"><a asp-action="Index" asp-controller="TypesOfCosts" class="text-decoration-none text-dark">@Localizer["TypesOfCosts"]</a></li>
+            }
+        </ul>
+    </div>
+</div>

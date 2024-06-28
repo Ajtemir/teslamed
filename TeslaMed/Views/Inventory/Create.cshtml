@@ -1,0 +1,93 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+
+@inject IViewLocalizer Localizer
+@model TeslaMed.Models.Inventory
+
+@{
+    ViewData["Title"] = @Localizer["Header"];
+}
+
+<a class="btn btn-primary" asp-action="Index">@Localizer["ButtonBack"]</a>
+
+<div class="row justify-content-around ms-0 me-0">
+    <div class="col col-sm-8 col-md-6 col-lg-5 col-xl-4 col-xxl-4">
+        <form asp-action="Create" method="post" id="form">
+            <h4 class="mb-3 text-center">@Localizer["Header"]</h4>
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group mb-3">
+                <label asp-for="InventoryNameId" class="control-label"></label>
+                <input type="text" list="names" class="form-control" id="nameInput" placeholder="@Localizer["NameInputPlaceholder"]" />
+                <datalist id="names">
+                    @{
+                        int counter = 0;
+                        foreach (var item in ViewBag.InventoryNames)
+                        {
+                            <option value="@item.Name, @item.Unit" id="optionValue_@counter"></option>
+                            <input type="hidden" value="@item.Id" asp-for="InventoryNameId" id="nameIdInput_@counter" />
+                            counter++;
+                        }
+                    }
+                </datalist>
+                <span asp-validation-for="InventoryNameId" class="text-danger" id="nameError"></span>
+            </div>
+            <div class="form-group mb-3">
+                <input asp-for="TotalAmount" type="hidden" class="form-control" value="0" />
+            </div>
+            <div class="form-group text-center mt-2">
+                <button class="btn btn-primary" type="submit" onclick="checkName(@counter)">@Localizer["ButtonCreate"]</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        function checkName(x){
+            event.preventDefault();
+            let name = $('#nameInput').val();
+            const nameArray = name.split(",");
+            console.log(nameArray);
+            if(nameArray.length != 2){
+                $('#nameError').text('@Localizer["NameError"]');
+            }
+            else if (nameArray[0].replace(/ /g, '') === '' || nameArray[1].replace(/ /g,'') === '') {
+                $('#nameError').text('@Localizer["NameAndUnitNullError"]');
+            }
+            else{
+                let counter1 = 0;
+                let id = 0;
+                for (let i = 0; i < x; i++) {
+                    const nameOfOption = $('#optionValue_' + i).val();
+                    const namesArray = nameOfOption.split(",");
+                    const nameId = $('#nameIdInput_' + i).val();
+                    if (namesArray[0] === nameArray[0]) {
+                        id = nameId;
+                        counter1++;
+                    }
+                }
+                if (counter1 > 0) {
+                    const nameIdInput = document.querySelector('#nameIdInput_' + 0);
+                    nameIdInput.value = id;
+                    $('#form').submit();
+                }
+                else {
+                    $.ajax({
+                        url: '@Url.Action("Create", "InventoryNames")',
+                        type: 'POST',
+                        data: { 'name': nameArray[0] + '!', 'unit': nameArray[1] + '!' },
+                        success: function (result) {
+                            console.log(result);
+                            const nameIdInputVal = document.querySelector('#nameIdInput_' + 0);
+                            console.log(nameIdInputVal);
+                            nameIdInputVal.value = result;
+                            $('#form').submit();
+                        },
+                    });
+                }
+            }
+        }
+    </script>
+}

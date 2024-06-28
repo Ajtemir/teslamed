@@ -1,0 +1,70 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+
+@inject IViewLocalizer Localizer
+@model List<OperatingCost>
+
+@{
+    ViewData["Title"] = @Localizer["Header"];
+}
+<div class="container">
+    <a class="btn btn-primary" asp-action="ShowPayDeskMainPage">@Localizer["ButtonBack"]</a>
+    <h2 class="text-center text-primary">@Localizer["Header"]</h2>
+    <div class="d-flex justify-content-between mb-4">
+        <div class="flex-fill">
+            <form method="get" asp-action="AccountingByCosts">
+                <div class="row ">
+                    <div class="col-md-3">
+                        <label for="firstDate">@Localizer["FirstDate"]:</label>
+                        <input type="date" name="firstDate" class="form-control" />
+                    </div>
+                    <div class="col-md-3">
+                        <label for="secondDate">@Localizer["SecondDate"]:</label>
+                        <input type="date" name="secondDate" class="form-control" />
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn mt-3" title="@Localizer["Apply"]"><img src="~/images/icons8-search.svg" class="w-100" style="max-width: 30px" /></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div >
+            <a asp-controller="OperatingActivities" asp-action="CreateOperatingCosts" asp-route-isManagersCost="true" title="@Localizer["ButtonCreate"]" >
+                <i class="bi bi-plus-circle fs-2"></i>
+            </a>
+        </div>
+    </div>
+    @if (Model.Count == 0)
+    {
+        <p class="text-center">@Localizer["NullList"]</p>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>№</th>
+                    <th>@Localizer["Name"]</th>
+                    <th>@Localizer["Date"]</th>
+                    <th>@Localizer["TotalAmount"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.Count(); i++)
+                {
+                    <tr>
+                        <td>@(i + 1)</td>
+                        @if(Model[i].IsManagersCost == true){
+                            <td>@Model[i].OperatingCostName.Name @Localizer["ManagersCosts"]</td>
+                        }
+                        else
+                        {
+                            <td>@Model[i].OperatingCostName.Name</td>
+                        }
+                        <td>@Model[i].DateOfCreation.ToString("d")</td>
+                        <td>@Model[i].TotalAmount</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

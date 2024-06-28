@@ -1,0 +1,67 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+﻿@using TeslaMed.ViewModels
+@model RevisionViewModel
+@inject IViewLocalizer Localizer
+@{
+    ViewData["Title"] = @Localizer["Title"];
+}
+<a class="btn btn-primary" asp-action="ShowAllRevisions">@Localizer["ButtonBack"]</a>
+
+<div class="row justify-content-around ms-0 me-0">
+    <div class="col col-sm-8 col-md-6 col-lg-5 col-xl-4 col-xxl-3">
+        <form asp-action="CreateRevision" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <div id="errorContainer"></div>
+                <label asp-for="InventoryId" class="control-label">@Localizer["Inventory"]</label>
+                <select asp-for="InventoryId" class="form-control" id="inventorySelect">
+                    <option value="">@Localizer["SelectInventory"]</option>
+                    @foreach (var inventory in ViewBag.Inventories)
+                    {
+                        <option value="@inventory.Id" data-name="@inventory.InventoryName.Name" data-unit="@inventory.InventoryName.Unit">
+                            @inventory.InventoryName.Name
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-group" hidden>
+                <label asp-for="Name" class="control-label">@Localizer["Name"]</label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="form-group" hidden>
+                <label asp-for="Unit" class="control-label">@Localizer["Unit"]</label>
+                <input asp-for="Unit" class="form-control" />
+                <span asp-validation-for="Unit" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="ActualRemainder" class="control-label">@Localizer["ActualRemainder"]</label>
+                <input asp-for="ActualRemainder" class="form-control" id="ActualRemainder" />
+            </div>
+            <input type="hidden" asp-for="InventoryNameId" id="inventoryNameId" />
+            <button type="submit" class="btn btn-primary mt-2">@Localizer["Create"]</button>
+
+        </form>
+    </div>
+</div>
+@section Scripts{
+    <script>
+        document.getElementById('inventorySelect').addEventListener('change', function () {
+            var selectedInventoryId = this.value;
+            var inventoryNameIdField = document.getElementById('inventoryNameId');
+            inventoryNameIdField.value = selectedInventoryId;
+        });
+    </script>
+    <script>
+        document.getElementById('inventorySelect').addEventListener('change', function () {
+            var selectedOption = this.options[this.selectedIndex];
+            var name = selectedOption.getAttribute('data-name');
+            var unit = selectedOption.getAttribute('data-unit');
+            document.getElementById('Name').value = name;
+            document.getElementById('Unit').value = unit;
+        });
+    </script>
+}
