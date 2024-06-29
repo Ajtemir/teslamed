@@ -111,7 +111,7 @@ namespace TeslaMed
             }
             IWebHostEnvironment env = app.Environment;
             //RotativaConfiguration.Setup((Microsoft.AspNetCore.Hosting.IHostingEnvironment)env, @"../wkhtmltopdf\bin");
-            RotativaConfiguration.Setup(env.WebRootPath, "/usr/bin/");
+            // RotativaConfiguration.Setup(env.WebRootPath, "/usr/bin/");
 
 
             //Configure the HTTP request pipeline.

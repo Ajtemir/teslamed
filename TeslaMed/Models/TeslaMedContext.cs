@@ -58,9 +58,9 @@ namespace TeslaMed.Models
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Departments)
                 .WithMany(d => d.Users);
-            modelBuilder.Entity<Diagnostics>()
-                .HasMany(d => d.DicomPathAndImagesPaths)
-                .WithOne();
+            // modelBuilder.Entity<Diagnostics>()
+            //     .HasMany(d => d.DicomPathAndImagesPaths)
+            //     .WithOne();
             modelBuilder.Entity<Diagnostics>()
                 .HasMany(d => d.Comments)
                 .WithOne(d => d.Diagnostics);
